@@ -44,11 +44,12 @@ const toRelative = (url) => {
         const tags = Array.isArray(item.tags) ? item.tags : [];
 
         const audioDescription = item.audioDescription || {};
-        const audioSrc =
+        const audioSrc = toRelative(
           audioDescription.src ||
           item.audioSrc ||
           item.audio ||
-          `./assets/audio/faq${idx + 1}.mp3`;
+          `./assets/audio/faq${idx + 1}.mp3`
+        );
         const durationSec =
           audioDescription.durationSec ??
           audioDescription.durationSeconds ??
@@ -120,8 +121,17 @@ const toRelative = (url) => {
       }
 
       const nextHowl = new HowlCtor({
-        src: [src],
-        html5: true,
+        src: [toRelative(src)],
+        tml5: true,
+        preload: true,
+        format: ['mp3'],
+        onplayerror: (id, err) => {
+          console.error('Howler play error:', err);
+           try { nextHowl.once('unlock', () => nextHowl.play()); } catch (_) {}
+        },
+        onloaderror: (id, err) => {
+          console.error('Howler load error for', src, err);
+        },
         onend: () => {
           if (audioRef.current.id === id) {
             teardown({ stop: false });
