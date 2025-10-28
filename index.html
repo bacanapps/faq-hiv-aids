@@ -9,7 +9,7 @@
   <meta name="theme-color" content="#0b1220" />
   <title>FAQ sobre HIV e Aids</title>
 
-  <!-- Inter font for crisp UI -->
+  <!-- Inter font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -17,35 +17,36 @@
     rel="stylesheet"
   />
 
-  <!-- Theme tokens for consistent fonts/variables across PWAs -->
-  <link rel="stylesheet" href="/assets/css/theme.css" />
+  <!-- Theme + App CSS (use RELATIVE paths for Pages + local) -->
+  <link rel="stylesheet" href="./assets/css/theme.css" />
+  <link rel="stylesheet" href="./assets/css/app.css" />
 
-  <!-- Your compiled Tailwind output -->
-  <link rel="stylesheet" href="/assets/css/app.css" />
+  <!-- PWA manifest -->
+  <link rel="manifest" href="./manifest.json" />
+
+  <!-- (Optional iOS meta/icons) -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
 </head>
 <body class="min-h-screen">
   <div id="root"></div>
 
-  <!-- React (CDN) -->
+  <!-- React + ReactDOM + Howler (loaded BEFORE your app) -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script>
-    window.React = React;
-    window.ReactDOM = ReactDOM;
-  </script>
   <script src="https://unpkg.com/howler/dist/howler.min.js"></script>
 
-  <!-- App -->
-  <link rel="manifest" href="./manifest.json">
+  <!-- Your app (RELATIVE path) -->
   <script src="./app.js" defer></script>
 
-  <!-- Service worker registration-->
+  <!-- Service worker registration (RELATIVE path) -->
   <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(console.error);
-  });
-}
-</script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(console.error);
+      });
+    }
+  </script>
 </body>
 </html>
