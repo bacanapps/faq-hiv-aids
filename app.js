@@ -60,7 +60,7 @@
   };
 
   const fetchFaqData = (signal) =>
-    fetch('/data/faq.json', { signal })
+    fetch('./data/faq.json', { signal })
       .then((res) => {
         if (!res.ok) throw new Error(`Falha ao carregar FAQs (${res.status})`);
         return res.json();
