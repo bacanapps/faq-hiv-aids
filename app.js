@@ -11,6 +11,16 @@
     BOT: 'bot'
   };
 
+  // Ensure asset paths work on GitHub Pages subpaths and locally
+const toRelative = (url) => {
+  if (!url) return url;
+  // Keep full URLs (http/https) as-is
+  if (/^https?:\/\//i.test(url)) return url;
+  // Convert absolute “/...” into relative “./...”
+  if (url.startsWith('/')) return `.${url}`;
+  return url; // already relative
+};
+
   const stripHtml = (value = '') => String(value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   const formatDuration = (seconds) => {
     const total = Number(seconds);
@@ -38,7 +48,7 @@
           audioDescription.src ||
           item.audioSrc ||
           item.audio ||
-          `/assets/audio/faq${idx + 1}.mp3`;
+          `./assets/audio/faq${idx + 1}.mp3`;
         const durationSec =
           audioDescription.durationSec ??
           audioDescription.durationSeconds ??
@@ -602,7 +612,7 @@
           h(
             'div',
             { className: 'bot-hero-figure', 'aria-hidden': 'true' },
-            h('img', { src: '/assets/img/hero.png', alt: '' })
+            h('img', { src: './assets/img/hero.png', alt: '' })
           )
         )
       ),
@@ -651,7 +661,7 @@
     const audioId = 'presentation-intro';
     const isPlaying = playingId === audioId;
     const handleAudio = React.useCallback(() => {
-      toggleAudio(audioId, '/assets/audio/presentation.mp3');
+      toggleAudio(audioId, './assets/audio/presentation.mp3');
     }, [toggleAudio]);
 
     const handleBack = React.useCallback(() => {
@@ -678,7 +688,7 @@
           h(
             'div',
             { className: 'presentation-hero-figure', 'aria-hidden': 'true' },
-            h('img', { src: '/assets/img/hero.png', alt: '' })
+            h('img', { src: './assets/img/hero.png', alt: '' })
           )
         )
       ),
