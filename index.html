@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <meta name="theme-color" content="#0b1220" />
+  <title>FAQ sobre HIV e Aids</title>
+
+  <!-- Inter font for crisp UI -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Theme tokens for consistent fonts/variables across PWAs -->
+  <link rel="stylesheet" href="/assets/css/theme.css" />
+
+  <!-- Your compiled Tailwind output -->
+  <link rel="stylesheet" href="/assets/css/app.css" />
+</head>
+<body class="min-h-screen">
+  <div id="root"></div>
+
+  <!-- React (CDN) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script>
+    window.React = React;
+    window.ReactDOM = ReactDOM;
+  </script>
+  <script src="https://unpkg.com/howler/dist/howler.min.js"></script>
+
+  <!-- App -->
+  <link rel="manifest" href="./manifest.json">
+  <script src="./app.js" defer></script>
+
+  <!-- Service worker registration-->
+  <script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(console.error);
+  });
+}
+</script>
+</body>
+</html>

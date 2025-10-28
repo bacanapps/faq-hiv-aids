@@ -1,0 +1,17 @@
+# faq-hiv-aids
+
+lsof -i :8002
+kill 
+
+cd /Users/cpantin/Library/CloudStorage/GoogleDrive-colin@cpantin.com/My\ Drive/@Ministério\ da\ Saúde/OPAS\ 2026/40\ anos\ da\ aids/faq-hiv-aids&& python3 -m http.server 8002
+
+# Manual test: audiodescricao play/pause behavior
+# 1. Start a local server (above) and open http://localhost:8002 in a browser.
+# 2. Navigate to 'Apresentação' or 'Perguntas Frequentes'.
+# 3. Click an "Audiodescrição" (music) button: it should start playing and the button label/icon changes to "Pausar".
+# 4. Click the same button: it should pause and the label/icon changes to "Retomar".
+# 5. Click a different audiodescrição button while one is playing: the first should stop and the second should start playing. Only one audio should play at a time.
+# 6. Let audio finish naturally — the button should return to the default "Audiodescrição" state.
+# Notes:
+# - The app uses Howler.js; audio state is synchronized via Howler event callbacks.
+# - If you see multiple audios playing at once, check browser console for errors and ensure the latest `app.js` is loaded (clear cache / hard refresh).

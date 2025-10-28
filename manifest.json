@@ -1,0 +1,18 @@
+{
+  "lang": "pt-BR",
+  "name": "(FAQ) Tira-dúvidas sobre HIV e aids",
+  "short_name": "Tira-dúvidas",
+  "description": "Ferramenta interativa de perguntas e respostas sobre HIV e aids.",
+  "start_url": "./index.html",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#1F2937",
+  "background_color": "#111827",
+  "icons": [
+    { "src": "./assets/img/hero.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./assets/img/hero.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "orientation": "portrait-primary"
+}

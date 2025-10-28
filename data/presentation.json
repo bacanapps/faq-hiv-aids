@@ -1,0 +1,11 @@
+{
+  "title": "Tira-dúvidas sobre HIV e aids",
+  "introHtml": "<p>Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.</p> <p>Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo. </p><p>Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.</p><p> Pergunte. O conhecimento transforma e salva vidas.</p>",
+  "disclaimerHtml": "<p>Este conteúdo é informativo e não substitui o atendimento médico. Para aconselhamento personalizado ou emergências, consulte um profissional de saúde ou o serviço oficial de saúde.</p>",
+  "audioDescription": {
+    "src": "/assets/audio/presentation.mp3",
+    "durationSec": 66
+  },
+  "heroImage": "/assets/img/hero.png",
+  "language": "pt-BR"
+}
