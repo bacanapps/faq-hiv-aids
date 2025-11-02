@@ -1,0 +1,312 @@
+/* THEME TOKENS + SEMANTIC UTILITIES (no Tailwind build required) */
+
+/* Base token fallbacks (default theme) */
+:root {
+  --color-bg-page: #080d1a;
+  --color-surface-card: #111827;
+  --color-surface-contrast: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --color-surface-overlay: rgba(8, 13, 26, 0.75);
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: rgba(226, 232, 240, 0.7);
+  --color-text-on-contrast: #ffffff;
+  --color-brand-accent: #5b9dff;
+  --color-border-card: rgba(94, 129, 172, 0.4);
+  --color-border-strong: rgba(91, 157, 255, 0.65);
+  --radius-card: 1.5rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 22px 48px -18px rgba(37, 99, 235, 0.55);
+  --shadow-flat: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --font-heading: "Archivo Black", "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+:root[data-theme="default"] {
+  --color-bg-page: #080d1a;
+  --color-surface-card: #111827;
+  --color-surface-contrast: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --color-surface-overlay: rgba(8, 13, 26, 0.75);
+  --color-text-primary: #f3f4f6;
+  --color-text-secondary: rgba(226, 232, 240, 0.7);
+  --color-text-on-contrast: #ffffff;
+  --color-brand-accent: #5b9dff;
+  --color-border-card: rgba(94, 129, 172, 0.4);
+  --color-border-strong: rgba(91, 157, 255, 0.65);
+  --radius-card: 1.5rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 22px 48px -18px rgba(37, 99, 235, 0.55);
+  --shadow-flat: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --font-heading: "Archivo Black", "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color-scheme: dark;
+}
+
+:root[data-theme="exhibit"] {
+  /* Page + surfaces */
+  --color-bg-page: #fdf6e9;              /* warm paper background */
+  --color-surface-card: #fffdf6;         /* card body (almost white/cream) */
+  --color-surface-contrast: #ffffff;     /* used for badges / icon chips in light mode */
+  --color-surface-overlay: rgba(0, 0, 0, 0.05);
+
+  /* Text */
+  --color-text-primary: #1a1a1a;         /* near-black for headings / body text */
+  --color-text-secondary: #44403c;       /* slightly muted body (gray-brown) */
+  --color-text-on-contrast: #1a1a1a;     /* text when sitting on contrast surface */
+  
+  /* Brand / accent */
+  --color-brand-accent: #b91c1c;         /* deep red for accents, headings, CTA ring */
+
+  /* Borders */
+  --color-border-card: rgba(0, 0, 0, 0.08);   /* subtle light border around cards */
+  --color-border-strong: #b91c1c;            /* strong/red border for emphasis */
+
+  /* Radii */
+  --radius-card: 0.75rem;    /* softer, pillowy cards similar to screenshot */
+  --radius-pill: 999px;
+
+  /* Shadows */
+  /* light, soft drop shadow under cards in exhibit mode */
+  --shadow-card: 0 24px 40px rgba(0, 0, 0, 0.18);
+  --shadow-flat: 0 0 0 1px rgba(0, 0, 0, 0.08);
+
+  /* Typography */
+  --font-heading: "Archivo Black", "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  color-scheme: light;
+}
+
+
+/* default theme heading accent (blue-ish / light-on-dark) */
+:root[data-theme="default"] .hero-title {
+  color: var(--color-text-primary);
+  background: linear-gradient(
+    90deg,
+    #cfe8ff 0%,
+    #5b9dff 40%,
+    #5b9dff 100%
+  );
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* exhibit theme heading accent (red headline like screenshot) */
+:root[data-theme="exhibit"] .hero-title {
+  background: none;
+  -webkit-background-clip: initial;
+  color: var(--color-brand-accent); /* our deep red */
+}
+
+/* Dark / default theme dots keep current neon */
+:root[data-theme="default"] .dot-green  { background-color: #10b981; }
+:root[data-theme="default"] .dot-blue   { background-color: #3b82f6; }
+:root[data-theme="default"] .dot-purple { background-color: #8b5cf6; }
+
+/* Exhibit / light theme dots -> green, teal-ish, red accent */
+:root[data-theme="exhibit"] .dot-green  { background-color: #15803d; }  /* dark green */
+:root[data-theme="exhibit"] .dot-blue   { background-color: #0f766e; }  /* teal */
+:root[data-theme="exhibit"] .dot-purple { background-color: #b91c1c; }  /* red accent */
+
+
+/* BASE LAYER */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-body);
+  line-height: 1.5;
+  background-color: var(--color-bg-page);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background-color: inherit;
+  color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--color-text-primary);
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background-color: var(--color-brand-accent);
+  color: var(--color-surface-card);
+}
+
+/* COMPONENT TOKENS */
+.bg-page {
+  background-color: var(--color-bg-page);
+}
+
+.surface-card {
+  background-color: var(--color-surface-card);
+}
+
+.surface-contrast {
+  background: var(--color-surface-contrast);
+  color: var(--color-text-on-contrast);
+}
+
+.surface-overlay {
+  background-color: var(--color-surface-overlay);
+  color: var(--color-text-on-contrast);
+}
+
+.card-surface {
+  background-color: var(--color-surface-card);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-card);
+  box-shadow: var(--shadow-card);
+}
+
+.card-flat {
+  background-color: var(--color-surface-card);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-card);
+  box-shadow: var(--shadow-flat);
+}
+
+.card-contrast {
+  background: var(--color-surface-contrast);
+  color: var(--color-text-on-contrast);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-strong);
+  box-shadow: none;
+}
+
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-on-contrast {
+  color: var(--color-text-on-contrast);
+}
+
+.accent-color {
+  color: var(--color-brand-accent);
+}
+
+.accent-bg {
+  background-color: var(--color-brand-accent);
+  color: var(--color-text-on-contrast);
+}
+
+.border-card {
+  border-color: var(--color-border-card);
+}
+
+.border-strong {
+  border-color: var(--color-border-strong);
+}
+
+.shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+.shadow-flat {
+  box-shadow: var(--shadow-flat);
+}
+
+.theme-transition {
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.pill-capsule {
+  border-radius: var(--radius-pill);
+}
+
+/* UTILITIES */
+.heading-display {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.heading-hero {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(2.25rem, 3vw, 3rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.body-copy {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+.lang-button {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  letter-spacing: 0.08em;
+  padding-inline: 1.75rem;
+  padding-block: 1rem;
+  border-radius: calc(var(--radius-card) / 1.5);
+  background-color: var(--color-surface-card);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-brand-accent);
+  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.lang-button:focus-visible {
+  outline: 3px solid var(--color-brand-accent);
+  outline-offset: 4px;
+}
+
+.lang-button:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-brand-accent);
+}
+
+.nav-arrow-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.18);
+  color: var(--color-text-primary);
+  padding-inline: 1.25rem;
+  padding-block: 1.5rem;
+}
+
+.nav-arrow-zone--strong {
+  background-color: var(--color-surface-contrast);
+  color: var(--color-text-on-contrast);
+}
+
+.callout-qr,
+.callout-audio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 1.5rem;
+  padding-block: 1rem;
+  border-radius: calc(var(--radius-card) / 2);
+  background-color: var(--color-surface-card);
+  color: var(--color-text-primary);
+  border: 1px dashed var(--color-border-strong);
+}
+
+html[data-theme] {
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}

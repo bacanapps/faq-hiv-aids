@@ -1,51 +1,51 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="h-full">
 <head>
   <meta charset="UTF-8" />
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"
   />
-  <meta name="theme-color" content="#0b1220" />
-  <title>FAQ sobre HIV e Aids</title>
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="description" content="FAQ interativo sobre HIV e aids com busca, audiodescrição e modo offline." />
 
-  <!-- Inter font -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <title>FAQ HIV e Aids</title>
 
-  <!-- Theme + App CSS (use RELATIVE paths for Pages + local) -->
+  <!-- Base styles -->
+  <link rel="stylesheet" href="./tokens.css" />
+  <link rel="stylesheet" href="./styles.css" />
+
+
+  <!-- (Optional legacy) If you still have these, they won't hurt.
+       Leaving them in case you already rely on something inside them. -->
   <link rel="stylesheet" href="./assets/css/theme.css" />
   <link rel="stylesheet" href="./assets/css/app.css" />
 
   <!-- PWA manifest -->
   <link rel="manifest" href="./manifest.json" />
 
-  <!-- (Optional iOS meta/icons) -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <!-- Icons / favicon -->
+  <link rel="icon" href="./icons/icon-192.png" />
 </head>
-<body class="min-h-screen">
-  <div id="root"></div>
 
-  <!-- React + ReactDOM + Howler (loaded BEFORE your app) -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<body class="app-shell">
+  <!-- React root -->
+  <div id="root" class="app-root"></div>
+
+  <!-- React + ReactDOM UMD (React 18) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+  <!-- Howler for audiodescrição -->
   <script src="https://unpkg.com/howler/dist/howler.min.js"></script>
 
-  <!-- Your app (RELATIVE path) -->
-  <script src="./app.js" defer></script>
+  <!-- Your App Code -->
+  <script defer src="app.js"></script>
 
-  <!-- Service worker registration (RELATIVE path) -->
+  <!-- Service worker (offline mode) -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(console.error);
-      });
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
     }
   </script>
 </body>

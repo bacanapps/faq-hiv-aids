@@ -1,6 +1,6 @@
-/* global React, ReactDOM */
+/* global React, ReactDOM, Howl */
 (function () {
-  const { useMemo, useState } = React;
+  const { useMemo, useState, useRef, useEffect, useCallback } = React;
   const h = React.createElement;
 
   // ---- ROUTER (very light) ----
@@ -8,30 +8,65 @@
     HOME: 'home',
     FAQ: 'faq',
     ABOUT: 'apresentacao',
-    BOT: 'bot'
+    BOT: 'bot',
   };
 
-  // Ensure asset paths work on GitHub Pages subpaths and locally
-const toRelative = (url) => {
-  if (!url) return url;
-  // Keep full URLs (http/https) as-is
-  if (/^https?:\/\//i.test(url)) return url;
-  // Convert absolute “/...” into relative “./...”
-  if (url.startsWith('/')) return `.${url}`;
-  return url; // already relative
-};
+function readThemeFromLocation() {
+  // location.hash looks like "#home?theme=exhibit"
+  // We'll split at "?" and parse the query part.
+  const rawHash = window.location.hash || ""; // e.g. "#home?theme=exhibit"
+  const [, query = ""] = rawHash.split("?");  // ["#home", "theme=exhibit"]
 
-  const stripHtml = (value = '') => String(value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-  const formatDuration = (seconds) => {
+  const params = new URLSearchParams(query);
+  const t = params.get("theme");
+
+  if (t === "exhibit" || t === "default") {
+    return t;
+  }
+
+  // fallback if no valid theme param
+  return "default";
+}
+
+function writeThemeToLocation(newTheme) {
+  // keep the current route (#home, #faq, etc.)
+  const rawHash = window.location.hash || "#home"; // e.g. "#home?theme=exhibit"
+  const [routePart] = rawHash.split("?");          // "#home"
+
+  const params = new URLSearchParams();
+  params.set("theme", newTheme);
+
+  // This will become "#home?theme=exhibit"
+  const nextHash = `${routePart}?${params.toString()}`;
+
+  // update without reloading
+  window.location.hash = nextHash;
+}
+
+
+
+  // Ensure asset paths work on GitHub Pages subpaths and locally
+  function toRelative(url) {
+    if (!url) return url;
+    if (/^https?:\/\//i.test(url)) return url; // keep absolute urls
+    if (url.startsWith('/')) return `.${url}`; // turn "/x" into "./x"
+    return url; // already relative
+  }
+
+  function stripHtml(value = '') {
+    return String(value).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function formatDuration(seconds) {
     const total = Number(seconds);
     if (!Number.isFinite(total) || total <= 0) return '';
     const mins = Math.floor(total / 60);
     const secs = Math.round(total % 60);
     if (mins === 0) return `${secs}s`;
     return `${mins}m ${secs.toString().padStart(2, '0')}s`;
-  };
+  }
 
-  const normalizeFaqEntries = (data) => {
+  function normalizeFaqEntries(data) {
     if (!Array.isArray(data)) return [];
     return data
       .map((item, idx) => {
@@ -46,10 +81,11 @@ const toRelative = (url) => {
         const audioDescription = item.audioDescription || {};
         const audioSrc = toRelative(
           audioDescription.src ||
-          item.audioSrc ||
-          item.audio ||
-          `./assets/audio/faq${idx + 1}.mp3`
+            item.audioSrc ||
+            item.audio ||
+            `./assets/audio/faq${idx + 1}.mp3`
         );
+
         const durationSec =
           audioDescription.durationSec ??
           audioDescription.durationSeconds ??
@@ -64,111 +100,136 @@ const toRelative = (url) => {
           tags,
           audioSrc,
           audioDurationLabel: formatDuration(durationSec),
-          searchText: `${question} ${answerText} ${tags.join(' ')}`.toLowerCase()
+          searchText: `${question} ${answerText} ${tags.join(' ')}`.toLowerCase(),
         };
       })
       .filter(Boolean);
-  };
+  }
 
-  const fetchFaqData = (signal) =>
-    fetch('./data/faq.json', { signal })
+  function fetchFaqData(signal) {
+    return fetch('./data/faq.json', { signal })
       .then((res) => {
         if (!res.ok) throw new Error(`Falha ao carregar FAQs (${res.status})`);
         return res.json();
       })
       .then((data) => normalizeFaqEntries(data));
+  }
 
+  // ---- AUDIO HOOK (Howler wrapper) ----
   function useHowlerAudio() {
     const [playingId, setPlayingId] = useState(null);
-    const audioRef = React.useRef({ id: null, howl: null });
+    const audioRef = useRef({ id: null, howl: null });
 
-    const teardown = React.useCallback((options = {}) => {
+    const teardown = useCallback((options = {}) => {
       const { stop = true, updateState = true } = options;
       const current = audioRef.current;
       if (current && current.howl) {
         if (stop) {
-          try { current.howl.stop(); } catch (_) {}
+          try {
+            current.howl.stop();
+          } catch (_) {}
         }
-        try { current.howl.unload(); } catch (_) {}
+        try {
+          current.howl.unload();
+        } catch (_) {}
       }
       audioRef.current = { id: null, howl: null };
       if (updateState) setPlayingId(null);
     }, []);
 
-    const toggle = React.useCallback((id, src) => {
-      if (!id || !src) return;
+    const toggle = useCallback(
+      (id, src) => {
+        if (!id || !src) return;
 
-      const HowlCtor = window.Howl || (window.Howler && window.Howler.Howl);
-      if (!HowlCtor) {
-        console.warn('Biblioteca de áudio não carregada.');
-        return;
-      }
-
-      const current = audioRef.current;
-      if (current.id === id && current.howl) {
-        if (current.howl.playing()) {
-          current.howl.pause();
-          setPlayingId(null);
-        } else {
-          current.howl.play();
-          setPlayingId(id);
+        // Howler global should exist
+        const HowlCtor = window.Howl || (window.Howler && window.Howler.Howl);
+        if (!HowlCtor) {
+          console.warn('Biblioteca de áudio não carregada.');
+          return;
         }
-        return;
-      }
 
-      if (current.howl) {
-        teardown();
-      }
+        const current = audioRef.current;
 
-      const nextHowl = new HowlCtor({
-        src: [toRelative(src)],
-        tml5: true,
-        preload: true,
-        format: ['mp3'],
-        onplayerror: (id, err) => {
-          console.error('Howler play error:', err);
-           try { nextHowl.once('unlock', () => nextHowl.play()); } catch (_) {}
-        },
-        onloaderror: (id, err) => {
-          console.error('Howler load error for', src, err);
-        },
-        onend: () => {
-          if (audioRef.current.id === id) {
-            teardown({ stop: false });
+        // If tapping the same item -> pause/unpause
+        if (current.id === id && current.howl) {
+          if (current.howl.playing()) {
+            current.howl.pause();
+            setPlayingId(null);
+          } else {
+            current.howl.play();
+            setPlayingId(id);
           }
-        },
-        onstop: () => {
-          if (audioRef.current.id === id) {
-            teardown({ stop: false });
-          }
+          return;
         }
-      });
 
-      audioRef.current = { id, howl: nextHowl };
-      nextHowl.play();
-      setPlayingId(id);
-    }, [teardown]);
+        // Otherwise, stop/unload previous
+        if (current.howl) {
+          teardown();
+        }
 
-    React.useEffect(() => () => teardown({ updateState: false }), [teardown]);
+        const nextHowl = new HowlCtor({
+          src: [toRelative(src)],
+          html5: true,
+          preload: true,
+          format: ['mp3'],
+          onplayerror: (howlId, err) => {
+            console.error('Howler play error:', err);
+            try {
+              nextHowl.once('unlock', () => nextHowl.play());
+            } catch (_) {}
+          },
+          onloaderror: (howlId, err) => {
+            console.error('Howler load error for', src, err);
+          },
+          onend: () => {
+            if (audioRef.current.id === id) {
+              teardown({ stop: false });
+            }
+          },
+          onstop: () => {
+            if (audioRef.current.id === id) {
+              teardown({ stop: false });
+            }
+          },
+        });
+
+        audioRef.current = { id, howl: nextHowl };
+        nextHowl.play();
+        setPlayingId(id);
+      },
+      [teardown]
+    );
+
+    // Cleanup on unmount
+    useEffect(
+      () => () => {
+        teardown({ updateState: false });
+      },
+      [teardown]
+    );
 
     return {
       playingId,
       toggle,
       stop: () => teardown(),
-      teardown
+      teardown,
     };
   }
 
+  // ---- FAQ DATA HOOK ----
   function useFaqData(teardownAudio) {
     const [faqItems, setFaqItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const controllerRef = React.useRef(null);
+    const controllerRef = useRef(null);
 
-    const load = React.useCallback(() => {
+    const load = useCallback(() => {
+      // abort old request
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
+
+      // stop any playing audio when reloading
       if (teardownAudio) {
         teardownAudio();
       }
@@ -196,9 +257,11 @@ const toRelative = (url) => {
       return controller;
     }, [teardownAudio]);
 
-    React.useEffect(() => {
+    // initial load
+    useEffect(() => {
       const controller = load();
       return () => {
+        // cleanup fetch if component unmounts
         if (controllerRef.current) {
           controllerRef.current.abort();
           controllerRef.current = null;
@@ -211,131 +274,261 @@ const toRelative = (url) => {
     return { faqItems, loading, error, reload: load };
   }
 
+  // ---- ROUTING HOOK ----
   function useRoute() {
     const [route, setRoute] = useState(() => {
       const hash = (location.hash || '').replace('#', '');
       return Object.values(Routes).includes(hash) ? hash : Routes.HOME;
     });
 
-    React.useEffect(() => {
-      const onHash = () => {
-        const h = (location.hash || '').replace('#', '');
-        setRoute(Object.values(Routes).includes(h) ? h : Routes.HOME);
-      };
+    useEffect(() => {
+      function onHash() {
+        const hVal = (location.hash || '').replace('#', '');
+        setRoute(Object.values(Routes).includes(hVal) ? hVal : Routes.HOME);
+      }
       window.addEventListener('hashchange', onHash);
       return () => window.removeEventListener('hashchange', onHash);
     }, []);
 
-    const navigate = (r) => { location.hash = r; };
+    function navigate(r) {
+      location.hash = r;
+    }
+
     return [route, navigate];
   }
 
-  // ---- UI PARTS ----
-  const HeaderHero = ({ title, subtitle }) => h(
-    'header',
-    { className: 'hero-blue' },
+  // ---- REUSABLE HEADER HERO (used on FAQ / Placeholder, not Home anymore) ----
+  const HeaderHero = ({ title, subtitle }) =>
     h(
-      'div',
-      { className: 'hero-container' },
-      h('h1', { className: 'hero-title text-gradient' }, title),
-      subtitle
-        ? h('p', { className: 'hero-subtitle muted' }, subtitle)
-        : null,
+      'header',
+      { className: 'hero-blue' },
       h(
         'div',
-        { className: 'badges muted' },
+        { className: 'hero-container' },
+        h('h1', { className: 'hero-title text-gradient' }, title),
+        subtitle
+          ? h('p', { className: 'hero-subtitle muted' }, subtitle)
+          : null,
         h(
-          'span',
-          { className: 'badge' },
-          h('span', { className: 'badge-dot dot-green', 'aria-hidden': 'true' }),
- //         h('span', { className: 'badge-text' }, 'Informações atualizadas')
-        ),
-        h(
-          'span',
-          { className: 'badge' },
-          h('span', { className: 'badge-dot dot-blue', 'aria-hidden': 'true' }),
- //         h('span', { className: 'badge-text' }, 'Audiodescrição inclusa')
-        ),
-        h(
-          'span',
-          { className: 'badge' },
-          h('span', { className: 'badge-dot dot-purple', 'aria-hidden': 'true' }),
- //         h('span', { className: 'badge-text' }, 'Busca inteligente')
+          'div',
+          { className: 'badges muted' },
+          h(
+            'span',
+            { className: 'badge' },
+            h('span', {
+              className: 'badge-dot dot-green',
+              'aria-hidden': 'true',
+            })
+          ),
+          h(
+            'span',
+            { className: 'badge' },
+            h('span', {
+              className: 'badge-dot dot-blue',
+              'aria-hidden': 'true',
+            })
+          ),
+          h(
+            'span',
+            { className: 'badge' },
+            h('span', {
+              className: 'badge-dot dot-purple',
+              'aria-hidden': 'true',
+            })
+          )
         )
       )
-    )
-  );
+    );
 
-  const Card = ({ icon, title, desc, cta, onClick, color }) => h(
-    'div',
-    { className: 'card-neo fade-in' },
-    h('div', { className: 'card-icon', 'aria-hidden': 'true' }, icon),
-    h('h3', { className: 'card-title' }, title),
-    h('p', { className: 'card-desc muted' }, desc),
-    h(
-      'button',
+  // ---- CARD COMPONENT (HOME feature cards) ----
+  function Card({ icon, title, desc, cta, color, onClick }) {
+    return h(
+      'article',
       {
-        className: `btn ${color}`,
+        className: 'card-neo theme-transition',
+        style: { cursor: 'pointer' },
         onClick,
-        type: 'button',
-        'aria-label': cta
       },
-      cta
-    )
-  );
+      h('div', { className: 'card-icon', 'aria-hidden': 'true' }, icon),
+      h('h2', { className: 'card-title' }, title),
+      h('p', { className: 'card-desc muted body-copy' }, desc),
+      h(
+        'button',
+        {
+          className: `btn ${color} theme-transition`,
+          type: 'button',
+          style: { width: '100%' },
+        },
+        cta
+      )
+    );
+  }
 
-  // ---- PAGES ----
-  function Home({ onNavigate }) {
+  // ---- PAGE: HOME ----
+  function Home({ onNavigate, onToggleTheme, currentTheme }) {
     return h(
       'div',
-      { className: 'fade-in' },
-      h(HeaderHero, {
-        title: 'FAQ sobre HIV e Aids',
-        subtitle: 'Tire suas dúvidas sobre HIV e aids de forma interativa e acessível'
-      }),
+      { className: 'fade-in theme-transition' },
+
+      // HEADER / HERO (custom for Home with toggle)
+      h(
+        'header',
+        { className: 'hero-blue theme-transition' },
+        h(
+          'div',
+          { className: 'hero-container' },
+          h(
+            'div',
+            {
+              style: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+                alignItems: 'flex-start',
+              },
+            },
+
+            // LEFT BLOCK: title/subtitle/dots
+            h(
+              'div',
+              { style: { minWidth: 0, flex: '1 1 auto' } },
+              h(
+                'h1',
+                {
+                  className: 'hero-title heading-hero text-primary',
+                  style: {
+                    margin: 0,
+                    textTransform: 'uppercase',
+                  },
+                },
+                'FAQ SOBRE HIV E AIDS'
+              ),
+              h(
+                'p',
+                {
+                  className:
+                    'hero-subtitle muted text-secondary body-copy',
+                  style: { marginTop: '0.5rem', maxWidth: '40rem' },
+                },
+                'Tire suas dúvidas sobre HIV e aids de forma interativa e acessível'
+              ),
+              h(
+                'div',
+                { className: 'badges text-secondary body-copy' },
+                h(
+                  'span',
+                  { className: 'badge' },
+                  h('span', {
+                    className: 'badge-dot dot-green',
+                    'aria-hidden': 'true',
+                  })
+                ),
+                h(
+                  'span',
+                  { className: 'badge' },
+                  h('span', {
+                    className: 'badge-dot dot-blue',
+                    'aria-hidden': 'true',
+                  })
+                ),
+                h(
+                  'span',
+                  { className: 'badge' },
+                  h('span', {
+                    className: 'badge-dot dot-purple',
+                    'aria-hidden': 'true',
+                  })
+                )
+              )
+            ),
+
+            // RIGHT BLOCK: theme toggle button
+            h(
+              'button',
+              {
+                type: 'button',
+                onClick: onToggleTheme,
+                className:
+                  'theme-transition card-flat pill-capsule body-copy',
+                style: {
+                  fontSize: '0.7rem',
+                  lineHeight: '1.2',
+                  minWidth: '7rem',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  borderWidth: '1px',
+                  borderStyle: 'solid',
+                  padding: '0.5rem 0.75rem',
+                  cursor: 'pointer',
+                  backgroundColor: 'transparent',
+                },
+                'aria-label':
+                  'Alternar tema visual / contraste para modo de exposição',
+              },
+              currentTheme === 'default' ? 'Exposição' : 'Padrão'
+            )
+          )
+        )
+      ),
+
+      // FEATURE CARDS
       h(
         'section',
-        { className: 'feature-strip' },
+        { className: 'feature-strip theme-transition' },
         h(
           'div',
           { className: 'feature-grid' },
+
+          // Card 1
           h(Card, {
-            icon: '🗂️',
+            icon: '📂',
             title: 'Apresentação',
-            desc: 'Conheça mais sobre HIV e aids, sua história e cuidados de prevenção',
+            desc:
+              'Conheça mais sobre HIV e aids, sua história e cuidados de prevenção',
             cta: 'Explorar',
             color: 'btn-primary',
-            onClick: () => onNavigate(Routes.ABOUT)
+            onClick: () => onNavigate(Routes.ABOUT),
           }),
+
+          // Card 2
           h(Card, {
             icon: '❓',
             title: 'Perguntas Frequentes',
-            desc: 'Mais de 30 perguntas e respostas sobre HIV e aids com busca inteligente',
+            desc:
+              'Mais de 30 perguntas e respostas sobre HIV e aids com busca inteligente',
             cta: 'Explorar',
             color: 'btn-green',
-            onClick: () => onNavigate(Routes.FAQ)
+            onClick: () => onNavigate(Routes.FAQ),
           }),
+
+          // Card 3
           h(Card, {
             icon: '🤖',
             title: 'Pergunte ao Bot',
-            desc: 'Faça perguntas específicas e encontre respostas personalizadas sobre HIV e aids',
+            desc:
+              'Faça perguntas específicas e encontre respostas personalizadas sobre HIV e aids',
             cta: 'Explorar',
             color: 'btn-purple',
-            onClick: () => onNavigate(Routes.BOT)
+            onClick: () => onNavigate(Routes.BOT),
           })
         )
       ),
+
+      // FOOTER
       h(
         'footer',
-        { className: 'footer' },
+        { className: 'footer theme-transition text-secondary body-copy' },
         'Informações baseadas em evidências científicas • Ministério da Saúde • OPAS'
       )
     );
   }
 
+  // ---- PAGE: FAQ ----
   function Faq({ onBack }) {
     const [term, setTerm] = useState('');
-    const { playingId, toggle: toggleAudio, teardown: teardownAudio } = useHowlerAudio();
+    const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
+      useHowlerAudio();
     const { faqItems, loading, error, reload } = useFaqData(teardownAudio);
 
     const list = useMemo(() => {
@@ -345,7 +538,8 @@ const toRelative = (url) => {
       return source.filter(({ searchText = '' }) => searchText.includes(t));
     }, [faqItems, term]);
 
-    React.useEffect(() => {
+    // stop audio if the currently-playing item is filtered out
+    useEffect(() => {
       if (!playingId) return;
       const stillVisible = list.some(({ id }) => id === playingId);
       if (!stillVisible) {
@@ -353,72 +547,111 @@ const toRelative = (url) => {
       }
     }, [list, playingId, teardownAudio]);
 
-    const handleAudioToggle = React.useCallback((faq) => {
-      toggleAudio(faq.id, faq.audioSrc);
-    }, [toggleAudio]);
+    const handleAudioToggle = useCallback(
+      (faq) => {
+        toggleAudio(faq.id, faq.audioSrc);
+      },
+      [toggleAudio]
+    );
 
-    const handleBack = React.useCallback(() => {
+    const handleBack = useCallback(() => {
       teardownAudio();
       onBack();
     }, [teardownAudio, onBack]);
 
     const listContent = (() => {
       if (loading) {
-        return h('div', { className: 'state-message muted' }, 'Carregando perguntas…');
+        return h(
+          'div',
+          { className: 'state-message muted' },
+          'Carregando perguntas…'
+        );
       }
       if (error) {
         return h(
           'div',
           { className: 'state-message state-error' },
           h('span', null, error),
-          h('button', {
-            type: 'button',
-            className: 'btn btn-primary btn-retry',
-            onClick: () => {
-              setTerm('');
-              reload();
-            }
-          }, 'Tentar novamente')
+          h(
+            'button',
+            {
+              type: 'button',
+              className: 'btn btn-primary btn-retry',
+              onClick: () => {
+                setTerm('');
+                reload();
+              },
+            },
+            'Tentar novamente'
+          )
         );
       }
       if (list.length === 0) {
-        return h('div', { className: 'state-message muted' }, 'Nenhuma pergunta encontrada para esse termo.');
+        return h(
+          'div',
+          { className: 'state-message muted' },
+          'Nenhuma pergunta encontrada para esse termo.'
+        );
       }
       return list.map((faq) => {
         const isPlaying = playingId === faq.id;
-        const audioLabel = isPlaying ? 'Pausar audiodescrição' : 'Ouvir audiodescrição';
+        const audioLabel = isPlaying
+          ? 'Pausar audiodescrição'
+          : 'Ouvir audiodescrição';
+
         return h(
           'details',
           { key: faq.id || faq.question, className: 'faq-item' },
           h(
             'summary',
             { className: 'faq-question' },
-            h('span', { className: 'faq-question-text' }, faq.question),
+            h(
+              'span',
+              { className: 'faq-question-text' },
+              faq.question || ''
+            ),
             faq.audioSrc
               ? h(
                   'button',
                   {
                     type: 'button',
-                    className: `faq-audio-btn${isPlaying ? ' is-playing' : ''}`,
+                    className: `faq-audio-btn${
+                      isPlaying ? ' is-playing' : ''
+                    }`,
                     onClick: (event) => {
                       event.preventDefault();
                       event.stopPropagation();
                       handleAudioToggle(faq);
                     },
                     'aria-pressed': isPlaying ? 'true' : 'false',
-                    'aria-label': audioLabel
+                    'aria-label': audioLabel,
                   },
-                  h('span', { className: 'faq-audio-icon', 'aria-hidden': 'true' }, '🔊'),
-                  h('span', { className: 'faq-audio-label' }, isPlaying ? 'Pausar' : 'Audiodescrição'),
+                  h(
+                    'span',
+                    {
+                      className: 'faq-audio-icon',
+                      'aria-hidden': 'true',
+                    },
+                    '🔊'
+                  ),
+                  h(
+                    'span',
+                    { className: 'faq-audio-label' },
+                    isPlaying ? 'Pausar' : 'Audiodescrição'
+                  ),
                   faq.audioDurationLabel
-                    ? h('span', { className: 'faq-audio-duration' }, faq.audioDurationLabel)
+                    ? h(
+                        'span',
+                        { className: 'faq-audio-duration' },
+                        faq.audioDurationLabel
+                      )
                     : null
                 )
               : null
           ),
           h('div', {
             className: 'faq-answer muted',
-            dangerouslySetInnerHTML: { __html: faq.answerHtml }
+            dangerouslySetInnerHTML: { __html: faq.answerHtml },
           })
         );
       });
@@ -436,14 +669,18 @@ const toRelative = (url) => {
           { className: 'faq-controls' },
           h(
             'button',
-            { type: 'button', className: 'btn btn-green', onClick: handleBack },
+            {
+              type: 'button',
+              className: 'btn btn-green',
+              onClick: handleBack,
+            },
             'Voltar'
           ),
           h('input', {
             className: 'faq-search',
             placeholder: 'Buscar por palavra-chave…',
             value: term,
-            onChange: (e) => setTerm(e.target.value)
+            onChange: (e) => setTerm(e.target.value),
           })
         ),
         h('div', { className: 'faq-list' }, listContent)
@@ -451,9 +688,11 @@ const toRelative = (url) => {
     );
   }
 
+  // ---- PAGE: BOT ----
   function Bot({ onBack }) {
     const [term, setTerm] = useState('');
-    const { playingId, toggle: toggleAudio, teardown: teardownAudio } = useHowlerAudio();
+    const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
+      useHowlerAudio();
     const { faqItems, loading, error, reload } = useFaqData(teardownAudio);
 
     const list = useMemo(() => {
@@ -463,7 +702,8 @@ const toRelative = (url) => {
       return source.filter(({ searchText = '' }) => searchText.includes(t));
     }, [faqItems, term]);
 
-    React.useEffect(() => {
+    // auto-stop audio if filtered
+    useEffect(() => {
       if (!playingId) return;
       const stillVisible = list.some(({ id }) => id === playingId);
       if (!stillVisible) {
@@ -471,11 +711,14 @@ const toRelative = (url) => {
       }
     }, [list, playingId, teardownAudio]);
 
-    const handleAudioToggle = React.useCallback((faq) => {
-      toggleAudio(faq.id, faq.audioSrc);
-    }, [toggleAudio]);
+    const handleAudioToggle = useCallback(
+      (faq) => {
+        toggleAudio(faq.id, faq.audioSrc);
+      },
+      [toggleAudio]
+    );
 
-    const handleBack = React.useCallback(() => {
+    const handleBack = useCallback(() => {
       teardownAudio();
       onBack();
     }, [teardownAudio, onBack]);
@@ -485,7 +728,11 @@ const toRelative = (url) => {
 
     let resultContent;
     if (loading) {
-      resultContent = h('div', { className: 'state-message muted' }, 'Carregando sugestões…');
+      resultContent = h(
+        'div',
+        { className: 'state-message muted' },
+        'Carregando sugestões…'
+      );
     } else if (error) {
       resultContent = h(
         'div',
@@ -499,7 +746,7 @@ const toRelative = (url) => {
             onClick: () => {
               setTerm('');
               reload();
-            }
+            },
           },
           'Tentar novamente'
         )
@@ -516,8 +763,16 @@ const toRelative = (url) => {
             h(
               'div',
               { className: 'bot-info-copy' },
-              h('p', { className: 'bot-info-title' }, 'Sugestão: explore todas as perguntas'),
-              h('p', { className: 'bot-info-text' }, 'Use palavras-chave como “prevenção”, “tratamento” ou “testes” para encontrar respostas mais rápidas.')
+              h(
+                'p',
+                { className: 'bot-info-title' },
+                'Sugestão: explore todas as perguntas'
+              ),
+              h(
+                'p',
+                { className: 'bot-info-text' },
+                'Use palavras-chave como “prevenção”, “tratamento” ou “testes” para encontrar respostas mais rápidas.'
+              )
             )
           )
         );
@@ -528,12 +783,24 @@ const toRelative = (url) => {
           h(
             'div',
             { key: 'empty', className: 'bot-empty-card' },
-            h('span', { className: 'bot-empty-icon', 'aria-hidden': 'true' }, '🔍'),
+            h(
+              'span',
+              { className: 'bot-empty-icon', 'aria-hidden': 'true' },
+              '🔍'
+            ),
             h(
               'div',
               null,
-              h('p', { className: 'bot-empty-title' }, 'Nenhuma resposta encontrada'),
-              h('p', { className: 'bot-empty-text' }, 'Tente termos diferentes ou mais gerais para ampliar a busca.')
+              h(
+                'p',
+                { className: 'bot-empty-title' },
+                'Nenhuma resposta encontrada'
+              ),
+              h(
+                'p',
+                { className: 'bot-empty-text' },
+                'Tente termos diferentes ou mais gerais para ampliar a busca.'
+              )
             )
           )
         );
@@ -543,28 +810,53 @@ const toRelative = (url) => {
         sections.push(
           ...list.map((faq) => {
             const isPlaying = playingId === faq.id;
-            const audioLabel = isPlaying ? 'Pausar audiodescrição' : 'Ouvir audiodescrição';
+            const audioLabel = isPlaying
+              ? 'Pausar audiodescrição'
+              : 'Ouvir audiodescrição';
             return h(
               'article',
               { key: faq.id || faq.question, className: 'bot-result' },
               h(
                 'div',
                 { className: 'bot-result-header' },
-                h('h3', { className: 'bot-result-title' }, faq.question),
+                h(
+                  'h3',
+                  { className: 'bot-result-title' },
+                  faq.question || ''
+                ),
                 faq.audioSrc
                   ? h(
                       'button',
                       {
                         type: 'button',
-                        className: `bot-audio-btn${isPlaying ? ' is-playing' : ''}`,
+                        className: `bot-audio-btn${
+                          isPlaying ? ' is-playing' : ''
+                        }`,
                         onClick: () => handleAudioToggle(faq),
                         'aria-pressed': isPlaying ? 'true' : 'false',
-                        'aria-label': audioLabel
+                        'aria-label': audioLabel,
                       },
-                      h('span', { className: 'bot-audio-icon', 'aria-hidden': 'true' }, isPlaying ? '⏸️' : '🎧'),
-                      h('span', { className: 'bot-audio-label' }, isPlaying ? 'Pausar' : 'Audiodescrição'),
+                      h(
+                        'span',
+                        {
+                          className: 'bot-audio-icon',
+                          'aria-hidden': 'true',
+                        },
+                        isPlaying ? '⏸️' : '🎧'
+                      ),
+                      h(
+                        'span',
+                        { className: 'bot-audio-label' },
+                        isPlaying
+                          ? 'Pausar'
+                          : 'Audiodescrição'
+                      ),
                       faq.audioDurationLabel
-                        ? h('span', { className: 'bot-audio-duration' }, faq.audioDurationLabel)
+                        ? h(
+                            'span',
+                            { className: 'bot-audio-duration' },
+                            faq.audioDurationLabel
+                          )
                         : null
                     )
                   : null
@@ -572,15 +864,25 @@ const toRelative = (url) => {
               faq.tags && faq.tags.length
                 ? h(
                     'div',
-                    { className: 'bot-tags', 'aria-label': 'Palavras-chave relacionadas' },
+                    {
+                      className: 'bot-tags',
+                      'aria-label': 'Palavras-chave relacionadas',
+                    },
                     ...faq.tags.map((tag, idx) =>
-                      h('span', { key: `${faq.id}-tag-${idx}`, className: 'bot-tag' }, tag)
+                      h(
+                        'span',
+                        {
+                          key: `${faq.id}-tag-${idx}`,
+                          className: 'bot-tag',
+                        },
+                        tag
+                      )
                     )
                   )
                 : null,
               h('div', {
                 className: 'bot-result-body muted',
-                dangerouslySetInnerHTML: { __html: faq.answerHtml }
+                dangerouslySetInnerHTML: { __html: faq.answerHtml },
               })
             );
           })
@@ -609,8 +911,16 @@ const toRelative = (url) => {
               h('span', null, 'Voltar')
             ),
             h('span', { className: 'bot-hero-eyebrow' }, 'Pergunte ao Bot'),
-            h('h2', { className: 'bot-hero-title' }, 'Encontre respostas instantâneas sobre HIV e aids'),
-            h('p', { className: 'bot-hero-description' }, 'Digite a sua dúvida ou explore o acervo completo de perguntas verificadas. As respostas são baseadas em evidências e atualizadas pelo Ministério da Saúde.'),
+            h(
+              'h2',
+              { className: 'bot-hero-title' },
+              'Encontre respostas instantâneas sobre HIV e aids'
+            ),
+            h(
+              'p',
+              { className: 'bot-hero-description' },
+              'Digite a sua dúvida ou explore o acervo completo de perguntas verificadas. As respostas são baseadas em evidências e atualizadas pelo Ministério da Saúde.'
+            ),
             h(
               'div',
               { className: 'bot-hero-highlights' },
@@ -632,18 +942,30 @@ const toRelative = (url) => {
         h(
           'div',
           { className: 'bot-search-card' },
-          h('h3', { className: 'bot-search-title' }, 'Faça sua pergunta'),
-          h('p', { className: 'bot-search-description' }, 'Use palavras-chave para filtrar as perguntas. Você pode buscar por termos como “profilaxia”, “transmissão” ou “tratamento”.'),
+          h(
+            'h3',
+            { className: 'bot-search-title' },
+            'Faça sua pergunta'
+          ),
+          h(
+            'p',
+            { className: 'bot-search-description' },
+            'Use palavras-chave para filtrar as perguntas. Você pode buscar por termos como “profilaxia”, “transmissão” ou “tratamento”.'
+          ),
           h(
             'div',
             { className: 'bot-search-bar' },
-            h('span', { className: 'bot-search-icon', 'aria-hidden': 'true' }, '🔍'),
+            h(
+              'span',
+              { className: 'bot-search-icon', 'aria-hidden': 'true' },
+              '🔍'
+            ),
             h('input', {
               className: 'bot-search-input',
               type: 'search',
               value: term,
               placeholder: 'Ex: Quais são as formas de prevenção?',
-              onChange: (e) => setTerm(e.target.value)
+              onChange: (e) => setTerm(e.target.value),
             }),
             term.trim()
               ? h(
@@ -651,10 +973,14 @@ const toRelative = (url) => {
                   {
                     type: 'button',
                     className: 'bot-search-clear',
-                    onClick: () => setTerm('')
+                    onClick: () => setTerm(''),
                   },
                   h('span', { 'aria-hidden': 'true' }, '✕'),
-                  h('span', { className: 'bot-search-clear-label' }, 'Limpar')
+                  h(
+                    'span',
+                    { className: 'bot-search-clear-label' },
+                    'Limpar'
+                  )
                 )
               : null
           )
@@ -664,17 +990,25 @@ const toRelative = (url) => {
     );
   }
 
+  // ---- PAGE: PRESENTATION ----
   function Presentation({ onBack }) {
-    const { playingId, toggle: toggleAudio, teardown: teardownAudio } = useHowlerAudio();
-    React.useEffect(() => () => teardownAudio({ updateState: false }), [teardownAudio]);
+    const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
+      useHowlerAudio();
+
+    // stop audio if we leave the page
+    useEffect(
+      () => () => teardownAudio({ updateState: false }),
+      [teardownAudio]
+    );
 
     const audioId = 'presentation-intro';
     const isPlaying = playingId === audioId;
-    const handleAudio = React.useCallback(() => {
+
+    const handleAudio = useCallback(() => {
       toggleAudio(audioId, './assets/audio/presentation.mp3');
     }, [toggleAudio]);
 
-    const handleBack = React.useCallback(() => {
+    const handleBack = useCallback(() => {
       teardownAudio();
       onBack();
     }, [teardownAudio, onBack]);
@@ -692,8 +1026,16 @@ const toRelative = (url) => {
             'div',
             { className: 'presentation-hero-copy' },
             h('span', { className: 'presentation-badge' }, 'Apresentação'),
-            h('h2', { className: 'presentation-title' }, 'Um espaço seguro para tirar dúvidas sobre HIV e aids'),
-            h('p', { className: 'presentation-lede' }, 'Conhecimento confiável, linguagem acolhedora e audiodescrição inclusiva para você.')
+            h(
+              'h2',
+              { className: 'presentation-title' },
+              'Um espaço seguro para tirar dúvidas sobre HIV e aids'
+            ),
+            h(
+              'p',
+              { className: 'presentation-lede' },
+              'Conhecimento confiável, linguagem acolhedora e audiodescrição inclusiva para você.'
+            )
           ),
           h(
             'div',
@@ -712,21 +1054,50 @@ const toRelative = (url) => {
             'button',
             {
               type: 'button',
-              className: `presentation-audio-btn${isPlaying ? ' is-playing' : ''}`,
+              className: `presentation-audio-btn${
+                isPlaying ? ' is-playing' : ''
+              }`,
               onClick: handleAudio,
               'aria-pressed': isPlaying ? 'true' : 'false',
-              'aria-label': isPlaying ? 'Pausar audiodescrição da apresentação' : 'Ouvir audiodescrição da apresentação'
+              'aria-label': isPlaying
+                ? 'Pausar audiodescrição da apresentação'
+                : 'Ouvir audiodescrição da apresentação',
             },
-            h('span', { className: 'presentation-audio-icon', 'aria-hidden': 'true' }, isPlaying ? '⏸️' : '🎧'),
-            h('span', { className: 'presentation-audio-label' }, isPlaying ? 'Pausar audiodescrição' : 'Ouvir audiodescrição')
+            h(
+              'span',
+              {
+                className: 'presentation-audio-icon',
+                'aria-hidden': 'true',
+              },
+              isPlaying ? '⏸️' : '🎧'
+            ),
+            h(
+              'span',
+              { className: 'presentation-audio-label' },
+              isPlaying
+                ? 'Pausar audiodescrição'
+                : 'Ouvir audiodescrição'
+            )
           )
         ),
         h(
           'div',
           { className: 'presentation-text muted' },
-          h('p', null, 'Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.'),
-          h('p', null, 'Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo.'),
-          h('p', null, 'Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.'),
+          h(
+            'p',
+            null,
+            'Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.'
+          ),
+          h(
+            'p',
+            null,
+            'Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo.'
+          ),
+          h(
+            'p',
+            null,
+            'Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.'
+          ),
           h('p', null, 'Pergunte. O conhecimento transforma e salva vidas.')
         ),
         h(
@@ -734,7 +1105,11 @@ const toRelative = (url) => {
           { className: 'presentation-actions' },
           h(
             'button',
-            { type: 'button', className: 'btn btn-green', onClick: handleBack },
+            {
+              type: 'button',
+              className: 'btn btn-green',
+              onClick: handleBack,
+            },
             'Voltar'
           )
         )
@@ -742,41 +1117,93 @@ const toRelative = (url) => {
     );
   }
 
-  const Placeholder = ({ title, onBack }) => h(
-    'div',
-    { className: 'fade-in' },
-    h(HeaderHero, { title, subtitle: '' }),
-    h(
-      'section',
-      { className: 'placeholder-section' },
-      h('p', { className: 'muted placeholder-copy' }, 'Conteúdo desta seção será adicionado.'),
+  // ---- FALLBACK PAGE ----
+  function Placeholder({ title, onBack }) {
+    return h(
+      'div',
+      { className: 'fade-in' },
+      h(HeaderHero, { title, subtitle: '' }),
       h(
-        'button',
-        { type: 'button', className: 'btn btn-primary', onClick: onBack },
-        'Voltar'
+        'section',
+        { className: 'placeholder-section' },
+        h(
+          'p',
+          { className: 'muted placeholder-copy' },
+          'Conteúdo desta seção será adicionado.'
+        ),
+        h(
+          'button',
+          { type: 'button', className: 'btn btn-primary', onClick: onBack },
+          'Voltar'
+        )
       )
-    )
-  );
+    );
+  }
 
-  // ---- APP ----
+  // ---- TOP-LEVEL APP (router switch + theme) ----
   function App() {
-    const [route, navigate] = useRoute();
+  const [route, navigate] = useRoute();
 
-    React.useEffect(() => { document.documentElement.classList.add('dark'); }, []);
+  // INITIAL THEME comes from URL (?theme=exhibit or ?theme=default)
+  const [theme, setTheme] = React.useState(() => readThemeFromLocation());
 
-    const go = (r) => navigate(r);
+  // Sync React state -> <html data-theme="..."> AND -> URL hash param
+  React.useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    writeThemeToLocation(theme);
+  }, [theme]);
 
-    if (route === Routes.FAQ) {
-      return h(Faq, { onBack: () => go(Routes.HOME) });
+  // Also react if user manually edits the URL hash
+  React.useEffect(() => {
+    function onHashChange() {
+      const urlTheme = readThemeFromLocation();
+      setTheme((current) => {
+        // avoid useless state updates
+        return current === urlTheme ? current : urlTheme;
+      });
     }
-  if (route === Routes.ABOUT) {
-    return h(Presentation, { onBack: () => go(Routes.HOME) });
-  }
-  if (route === Routes.BOT) {
-    return h(Bot, { onBack: () => go(Routes.HOME) });
-  }
-    return h(Home, { onNavigate: go });
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  // Toggle from button
+  function toggleTheme() {
+    setTheme((t) => (t === "default" ? "exhibit" : "default"));
   }
 
-  ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+  let screen;
+  if (route === Routes.FAQ) {
+    screen = h(Faq, { onBack: () => navigate(Routes.HOME) });
+  } else if (route === Routes.BOT) {
+    screen = h(Bot, { onBack: () => navigate(Routes.HOME) });
+  } else if (route === Routes.ABOUT) {
+    screen = h(Presentation, { onBack: () => navigate(Routes.HOME) });
+  } else if (route === Routes.HOME) {
+    screen = h(Home, {
+      onNavigate: (nextRoute) => navigate(nextRoute),
+      onToggleTheme: toggleTheme,
+      currentTheme: theme,
+    });
+  } else {
+    screen = h(Placeholder, {
+      title: "Conteúdo não encontrado",
+      onBack: () => navigate(Routes.HOME),
+    });
+  }
+
+  return h(
+    "main",
+    {
+      className:
+        "app-shell app-root theme-transition bg-page text-textPrimary",
+    },
+    screen
+  );
+}
+
+
+  // ---- MOUNT REACT 18 ROOT ----
+  const container = document.getElementById('root');
+  const root = ReactDOM.createRoot(container);
+  root.render(h(App));
 })();
