@@ -214,6 +214,9 @@ h6 {
   font-weight: inherit;
 }
 
+h2.choice-title {
+    color: #ff0000;
+}
 /*
 Reset links to optimize for opt-in styling instead of opt-out.
 */
@@ -637,6 +640,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .text-primary {
   color: var(--color-text-primary);
+}
+
+button.btn.btn-primary {
+    background: linear-gradient(to right, rgb(59, 130, 246), rgb(99, 102, 241));
 }
 
 .text-secondary {

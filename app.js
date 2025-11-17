@@ -12,35 +12,32 @@
   };
 
 function readThemeFromLocation() {
-  // location.hash looks like "#home?theme=exhibit"
-  // We'll split at "?" and parse the query part.
-  const rawHash = window.location.hash || ""; // e.g. "#home?theme=exhibit"
-  const [, query = ""] = rawHash.split("?");  // ["#home", "theme=exhibit"]
+  // Check URL search parameter first (?theme=light or ?theme=dark)
+  const urlParams = new URLSearchParams(window.location.search);
+  const themeParam = urlParams.get('theme');
 
-  const params = new URLSearchParams(query);
-  const t = params.get("theme");
-
-  if (t === "exhibit" || t === "default") {
-    return t;
+  if (themeParam === "dark" || themeParam === "light") {
+    return themeParam;
   }
 
-  // fallback if no valid theme param
-  return "default";
+  // Check localStorage
+  const saved = localStorage.getItem('faq-hiv-aids-theme');
+  if (saved === "dark" || saved === "light") {
+    return saved;
+  }
+
+  // fallback to light as default
+  return "light";
 }
 
 function writeThemeToLocation(newTheme) {
-  // keep the current route (#home, #faq, etc.)
-  const rawHash = window.location.hash || "#home"; // e.g. "#home?theme=exhibit"
-  const [routePart] = rawHash.split("?");          // "#home"
+  // Save to localStorage
+  localStorage.setItem('faq-hiv-aids-theme', newTheme);
 
-  const params = new URLSearchParams();
-  params.set("theme", newTheme);
-
-  // This will become "#home?theme=exhibit"
-  const nextHash = `${routePart}?${params.toString()}`;
-
-  // update without reloading
-  window.location.hash = nextHash;
+  // Update URL search parameter
+  const url = new URL(window.location);
+  url.searchParams.set('theme', newTheme);
+  window.history.pushState({}, '', url);
 }
 
 
@@ -305,7 +302,7 @@ function writeThemeToLocation(newTheme) {
       h(
         'div',
         { className: 'hero-container' },
-        h('h1', { className: 'hero-title text-gradient' }, title),
+        h('h1', { className: 'hero-title' }, title),
         subtitle
           ? h('p', { className: 'hero-subtitle muted' }, subtitle)
           : null,
@@ -368,164 +365,99 @@ function writeThemeToLocation(newTheme) {
   function Home({ onNavigate, onToggleTheme, currentTheme }) {
     return h(
       'div',
-      { className: 'fade-in theme-transition' },
+      { className: 'page fade-in' },
 
-      // HEADER / HERO (custom for Home with toggle)
+      // Theme toggle button (fixed position)
       h(
-        'header',
-        { className: 'hero-blue theme-transition' },
+        'button',
+        {
+          className: 'theme-toggle-btn',
+          onClick: onToggleTheme,
+          'aria-label': 'Alternar tema'
+        },
+        currentTheme === 'light' ? '🌙' : '☀️'
+      ),
+
+      // Hero section with gradient glass card
+      h(
+        'section',
+        { className: 'hero hero-gradient glass-card' },
         h(
           'div',
-          { className: 'hero-container' },
+          { className: 'hero-header' },
           h(
             'div',
-            {
-              style: {
-                display: 'flex',
-                justifyContent: 'space-between',
-                flexWrap: 'wrap',
-                gap: '1rem',
-                alignItems: 'flex-start',
-              },
-            },
-
-            // LEFT BLOCK: title/subtitle/dots
+            { className: 'hero-content' },
             h(
-              'div',
-              { style: { minWidth: 0, flex: '1 1 auto' } },
-              h(
-                'h1',
-                {
-                  className: 'hero-title heading-hero text-primary',
-                  style: {
-                    margin: 0,
-                    textTransform: 'uppercase',
-                  },
-                },
-                'FAQ SOBRE HIV E AIDS'
-              ),
-              h(
-                'p',
-                {
-                  className:
-                    'hero-subtitle muted text-secondary body-copy',
-                  style: { marginTop: '0.5rem', maxWidth: '40rem' },
-                },
-                'Tire suas dúvidas sobre HIV e aids de forma interativa e acessível'
-              ),
-              h(
-                'div',
-                { className: 'badges text-secondary body-copy' },
-                h(
-                  'span',
-                  { className: 'badge' },
-                  h('span', {
-                    className: 'badge-dot dot-green',
-                    'aria-hidden': 'true',
-                  })
-                ),
-                h(
-                  'span',
-                  { className: 'badge' },
-                  h('span', {
-                    className: 'badge-dot dot-blue',
-                    'aria-hidden': 'true',
-                  })
-                ),
-                h(
-                  'span',
-                  { className: 'badge' },
-                  h('span', {
-                    className: 'badge-dot dot-purple',
-                    'aria-hidden': 'true',
-                  })
-                )
-              )
+              'h1',
+              { className: 'hero-title' },
+              'FAQ sobre HIV e AIDS'
             ),
-
-            // RIGHT BLOCK: theme toggle button
             h(
-              'button',
-              {
-                type: 'button',
-                onClick: onToggleTheme,
-                className:
-                  'theme-transition card-flat pill-capsule body-copy',
-                style: {
-                  fontSize: '0.7rem',
-                  lineHeight: '1.2',
-                  minWidth: '7rem',
-                  textAlign: 'center',
-                  fontWeight: '500',
-                  borderWidth: '1px',
-                  borderStyle: 'solid',
-                  padding: '0.5rem 0.75rem',
-                  cursor: 'pointer',
-                  backgroundColor: 'transparent',
-                },
-                'aria-label':
-                  'Alternar tema visual / contraste para modo de exposição',
-              },
-              currentTheme === 'default' ? 'Exposição' : 'Padrão'
+              'p',
+              { className: 'hero-lede' },
+              'Informações confiáveis sobre prevenção, tratamento e convivência'
             )
           )
         )
       ),
 
-      // FEATURE CARDS
+      // Two-column cards section
       h(
         'section',
-        { className: 'feature-strip theme-transition' },
+        { className: 'home-cards' },
         h(
           'div',
-          { className: 'feature-grid' },
+          { className: 'cards-2col' },
 
-          // Card 1
-          h(Card, {
-            icon: '📂',
-            title: 'Apresentação',
-            desc:
-              'Conheça mais sobre HIV e aids, sua história e cuidados de prevenção',
-            cta: 'Explorar',
-            color: 'btn-primary',
-            onClick: () => onNavigate(Routes.ABOUT),
-          }),
+          // Card 1: Apresentação
+          h(
+            'article',
+            {
+              className: 'choice-card glass-card card-hover',
+              onClick: () => onNavigate(Routes.ABOUT)
+            },
+            h('div', { className: 'choice-icon' }, '💊'),
+            h('h2', { className: 'choice-title' }, 'Apresentação'),
+            h(
+              'p',
+              { className: 'choice-desc' },
+              'Conheça mais sobre HIV e aids, sua história e cuidados de prevenção'
+            ),
+            h(
+              'div',
+              { className: 'actions' },
+              h('button', { className: 'btn btn-primary' }, 'Explorar')
+            )
+          ),
 
-          // Card 2
-          h(Card, {
-            icon: '❓',
-            title: 'Perguntas Frequentes',
-            desc:
-              'Mais de 30 perguntas e respostas sobre HIV e aids com busca inteligente',
-            cta: 'Explorar',
-            color: 'btn-green',
-            onClick: () => onNavigate(Routes.FAQ),
-          }),
-
-          // Card 3
-          h(Card, {
-            icon: '🤖',
-            title: 'Pergunte ao Bot',
-            desc:
-              'Faça perguntas específicas e encontre respostas personalizadas sobre HIV e aids',
-            cta: 'Explorar',
-            color: 'btn-purple',
-            onClick: () => onNavigate(Routes.BOT),
-          })
+          // Card 2: Perguntas Frequentes
+          h(
+            'article',
+            {
+              className: 'choice-card glass-card card-hover',
+              onClick: () => onNavigate(Routes.FAQ)
+            },
+            h('div', { className: 'choice-icon' }, '❓'),
+            h('h2', { className: 'choice-title' }, 'Perguntas Frequentes'),
+            h(
+              'p',
+              { className: 'choice-desc' },
+              'Mais de 30 perguntas e respostas sobre HIV e aids com busca inteligente'
+            ),
+            h(
+              'div',
+              { className: 'actions' },
+              h('button', { className: 'btn btn-green' }, 'Explorar')
+            )
+          )
         )
-      ),
-
-      // FOOTER
-      h(
-        'footer',
-        { className: 'footer theme-transition text-secondary body-copy' },
-        'Informações baseadas em evidências científicas • Ministério da Saúde • OPAS'
       )
     );
   }
 
   // ---- PAGE: FAQ ----
-  function Faq({ onBack }) {
+  function Faq({ onBack, onToggleTheme, currentTheme }) {
     const [term, setTerm] = useState('');
     const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
       useHowlerAudio();
@@ -684,12 +616,21 @@ function writeThemeToLocation(newTheme) {
           })
         ),
         h('div', { className: 'faq-list' }, listContent)
+      ),
+      h(
+        'button',
+        {
+          className: 'theme-toggle-btn',
+          onClick: onToggleTheme,
+          'aria-label': 'Alternar tema'
+        },
+        currentTheme === 'light' ? '🌙' : '☀️'
       )
     );
   }
 
   // ---- PAGE: BOT ----
-  function Bot({ onBack }) {
+  function Bot({ onBack, onToggleTheme, currentTheme }) {
     const [term, setTerm] = useState('');
     const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
       useHowlerAudio();
@@ -986,12 +927,21 @@ function writeThemeToLocation(newTheme) {
           )
         ),
         resultContent
+      ),
+      h(
+        'button',
+        {
+          className: 'theme-toggle-btn',
+          onClick: onToggleTheme,
+          'aria-label': 'Alternar tema'
+        },
+        currentTheme === 'light' ? '🌙' : '☀️'
       )
     );
   }
 
   // ---- PAGE: PRESENTATION ----
-  function Presentation({ onBack }) {
+  function Presentation({ onBack, onToggleTheme, currentTheme }) {
     const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
       useHowlerAudio();
 
@@ -1008,109 +958,73 @@ function writeThemeToLocation(newTheme) {
       toggleAudio(audioId, './assets/audio/presentation.mp3');
     }, [toggleAudio]);
 
-    const handleBack = useCallback(() => {
+    const handleBack = useCallback((e) => {
+      e.preventDefault();
       teardownAudio();
       onBack();
     }, [teardownAudio, onBack]);
 
+    const presentationHtml = `
+      <p>Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.</p>
+      <p>Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo.</p>
+      <p>Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.</p>
+      <p>Pergunte. O conhecimento transforma e salva vidas.</p>
+    `;
+
     return h(
       'div',
-      { className: 'fade-in' },
+      { className: 'page fade-in' },
+      // Header
       h(
-        'section',
-        { className: 'presentation-hero' },
+        'header',
+        { className: 'page-header' },
         h(
-          'div',
-          { className: 'presentation-hero-inner' },
-          h(
-            'div',
-            { className: 'presentation-hero-copy' },
-            h('span', { className: 'presentation-badge' }, 'Apresentação'),
-            h(
-              'h2',
-              { className: 'presentation-title' },
-              'Um espaço seguro para tirar dúvidas sobre HIV e aids'
-            ),
-            h(
-              'p',
-              { className: 'presentation-lede' },
-              'Conhecimento confiável, linguagem acolhedora e audiodescrição inclusiva para você.'
-            )
-          ),
-          h(
-            'div',
-            { className: 'presentation-hero-figure', 'aria-hidden': 'true' },
-            h('img', { src: './assets/img/hero.png', alt: '' })
-          )
+          'a',
+          {
+            href: '#',
+            className: 'back-link',
+            onClick: handleBack
+          },
+          '← Voltar'
+        ),
+        h('h1', { className: 'page-title' }, 'FAQ sobre HIV e AIDS'),
+        h(
+          'button',
+          {
+            className: 'theme-toggle-btn',
+            onClick: onToggleTheme,
+            'aria-label': 'Alternar tema'
+          },
+          currentTheme === 'light' ? '🌙' : '☀️'
         )
       ),
+
+      // Presentation card
       h(
-        'section',
-        { className: 'presentation-content' },
+        'div',
+        { className: 'presentation-card' },
         h(
           'div',
-          { className: 'presentation-audio' },
+          { className: 'presentation-heroimg-wrapper' },
+          h('img', {
+            src: './assets/img/hero.png',
+            alt: 'FAQ sobre HIV e AIDS'
+          })
+        ),
+        h('div', {
+          className: 'presentation-textblock',
+          dangerouslySetInnerHTML: { __html: presentationHtml }
+        }),
+        h(
+          'div',
+          { className: 'audio-row' },
           h(
             'button',
             {
-              type: 'button',
-              className: `presentation-audio-btn${
-                isPlaying ? ' is-playing' : ''
-              }`,
-              onClick: handleAudio,
-              'aria-pressed': isPlaying ? 'true' : 'false',
-              'aria-label': isPlaying
-                ? 'Pausar audiodescrição da apresentação'
-                : 'Ouvir audiodescrição da apresentação',
+              className: 'audio-btn',
+              onClick: handleAudio
             },
-            h(
-              'span',
-              {
-                className: 'presentation-audio-icon',
-                'aria-hidden': 'true',
-              },
-              isPlaying ? '⏸️' : '🎧'
-            ),
-            h(
-              'span',
-              { className: 'presentation-audio-label' },
-              isPlaying
-                ? 'Pausar audiodescrição'
-                : 'Ouvir audiodescrição'
-            )
-          )
-        ),
-        h(
-          'div',
-          { className: 'presentation-text muted' },
-          h(
-            'p',
-            null,
-            'Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.'
-          ),
-          h(
-            'p',
-            null,
-            'Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo.'
-          ),
-          h(
-            'p',
-            null,
-            'Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.'
-          ),
-          h('p', null, 'Pergunte. O conhecimento transforma e salva vidas.')
-        ),
-        h(
-          'div',
-          { className: 'presentation-actions' },
-          h(
-            'button',
-            {
-              type: 'button',
-              className: 'btn btn-green',
-              onClick: handleBack,
-            },
-            'Voltar'
+            `🎵 ${isPlaying ? 'Pausar' : 'Audiodescrição'}`
           )
         )
       )
@@ -1147,37 +1061,36 @@ function writeThemeToLocation(newTheme) {
   // INITIAL THEME comes from URL (?theme=exhibit or ?theme=default)
   const [theme, setTheme] = React.useState(() => readThemeFromLocation());
 
-  // Sync React state -> <html data-theme="..."> AND -> URL hash param
+  // Sync React state -> <html data-theme="..."> AND -> URL search param
   React.useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     writeThemeToLocation(theme);
   }, [theme]);
 
-  // Also react if user manually edits the URL hash
-  React.useEffect(() => {
-    function onHashChange() {
-      const urlTheme = readThemeFromLocation();
-      setTheme((current) => {
-        // avoid useless state updates
-        return current === urlTheme ? current : urlTheme;
-      });
-    }
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-
   // Toggle from button
   function toggleTheme() {
-    setTheme((t) => (t === "default" ? "exhibit" : "default"));
+    setTheme((t) => (t === "light" ? "dark" : "light"));
   }
 
   let screen;
   if (route === Routes.FAQ) {
-    screen = h(Faq, { onBack: () => navigate(Routes.HOME) });
+    screen = h(Faq, {
+      onBack: () => navigate(Routes.HOME),
+      onToggleTheme: toggleTheme,
+      currentTheme: theme
+    });
   } else if (route === Routes.BOT) {
-    screen = h(Bot, { onBack: () => navigate(Routes.HOME) });
+    screen = h(Bot, {
+      onBack: () => navigate(Routes.HOME),
+      onToggleTheme: toggleTheme,
+      currentTheme: theme
+    });
   } else if (route === Routes.ABOUT) {
-    screen = h(Presentation, { onBack: () => navigate(Routes.HOME) });
+    screen = h(Presentation, {
+      onBack: () => navigate(Routes.HOME),
+      onToggleTheme: toggleTheme,
+      currentTheme: theme
+    });
   } else if (route === Routes.HOME) {
     screen = h(Home, {
       onNavigate: (nextRoute) => navigate(nextRoute),
