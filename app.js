@@ -978,6 +978,10 @@ function writeThemeToLocation(newTheme) {
             isPlaying ? '⏸️ Pausar' : '▶️ Audiodescrição'
           )
         )
+      ),
+
+      h('div', { className: 'app-footer-line' },
+        '© 2025 Dezembro Vermelho • Ministério da Saúde'
       )
     );
   }
