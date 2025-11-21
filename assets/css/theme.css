@@ -395,18 +395,27 @@ h2 {
 }
 
 .presentation-heroimg-wrapper {
-  text-align: center;
+  background-color: #ff0000;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  aspect-ratio: 16/6;
   margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
 }
 
 .presentation-heroimg-wrapper img,
 .hero-image {
-  width: 400px;
-  height: 400px;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  margin: 0 auto;
+  max-width: 600px;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+  border: none;
+  margin: 0;
   display: block;
 }
 
