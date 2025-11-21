@@ -428,6 +428,10 @@ function writeThemeToLocation(newTheme) {
             )
           )
         )
+      ),
+
+      h('div', { className: 'app-footer-line' },
+        '© 2025 Dezembro Vermelho • Ministério da Saúde'
       )
     );
   }
@@ -594,6 +598,10 @@ function writeThemeToLocation(newTheme) {
           'aria-label': 'Alternar tema'
         },
         currentTheme === 'light' ? '🌙' : '☀️'
+      ),
+
+      h('div', { className: 'app-footer-line' },
+        '© 2025 Dezembro Vermelho • Ministério da Saúde'
       )
     );
   }
@@ -882,6 +890,10 @@ function writeThemeToLocation(newTheme) {
           'aria-label': 'Alternar tema'
         },
         currentTheme === 'light' ? '🌙' : '☀️'
+      ),
+
+      h('div', { className: 'app-footer-line' },
+        '© 2025 Dezembro Vermelho • Ministério da Saúde'
       )
     );
   }
