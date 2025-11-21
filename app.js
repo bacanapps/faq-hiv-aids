@@ -297,42 +297,18 @@ function writeThemeToLocation(newTheme) {
   // ---- REUSABLE HEADER HERO (used on FAQ / Placeholder, not Home anymore) ----
   const HeaderHero = ({ title, subtitle }) =>
     h(
-      'header',
-      { className: 'hero-blue' },
+      'section',
+      { className: 'hero hero-gradient glass-card' },
       h(
         'div',
-        { className: 'hero-container' },
-        h('h1', { className: 'hero-title' }, title),
-        subtitle
-          ? h('p', { className: 'hero-subtitle muted' }, subtitle)
-          : null,
+        { className: 'hero-header' },
         h(
           'div',
-          { className: 'badges muted' },
-          h(
-            'span',
-            { className: 'badge' },
-            h('span', {
-              className: 'badge-dot dot-green',
-              'aria-hidden': 'true',
-            })
-          ),
-          h(
-            'span',
-            { className: 'badge' },
-            h('span', {
-              className: 'badge-dot dot-blue',
-              'aria-hidden': 'true',
-            })
-          ),
-          h(
-            'span',
-            { className: 'badge' },
-            h('span', {
-              className: 'badge-dot dot-purple',
-              'aria-hidden': 'true',
-            })
-          )
+          { className: 'hero-content' },
+          h('h1', { className: 'hero-title' }, title),
+          subtitle
+            ? h('p', { className: 'hero-lede' }, subtitle)
+            : null
         )
       )
     );
@@ -417,7 +393,7 @@ function writeThemeToLocation(newTheme) {
               className: 'choice-card glass-card card-hover',
               onClick: () => onNavigate(Routes.ABOUT)
             },
-            h('div', { className: 'choice-icon' }, '💊'),
+            h('div', { className: 'choice-icon' }, '📘'),
             h('h2', { className: 'choice-title' }, 'Apresentação'),
             h(
               'p',
@@ -547,9 +523,7 @@ function writeThemeToLocation(newTheme) {
                   'button',
                   {
                     type: 'button',
-                    className: `faq-audio-btn${
-                      isPlaying ? ' is-playing' : ''
-                    }`,
+                    className: 'audio-btn',
                     onClick: (event) => {
                       event.preventDefault();
                       event.stopPropagation();
@@ -563,26 +537,7 @@ function writeThemeToLocation(newTheme) {
                     'aria-pressed': isPlaying ? 'true' : 'false',
                     'aria-label': audioLabel,
                   },
-                  h(
-                    'span',
-                    {
-                      className: 'faq-audio-icon',
-                      'aria-hidden': 'true',
-                    },
-                    '🔊'
-                  ),
-                  h(
-                    'span',
-                    { className: 'faq-audio-label' },
-                    isPlaying ? 'Pausar' : 'Audiodescrição'
-                  ),
-                  faq.audioDurationLabel
-                    ? h(
-                        'span',
-                        { className: 'faq-audio-duration' },
-                        faq.audioDurationLabel
-                      )
-                    : null
+                  isPlaying ? '⏸️ Pausar' : '▶️ Audiodescrição'
                 )
               : null
           ),
@@ -597,7 +552,7 @@ function writeThemeToLocation(newTheme) {
     return h(
       'div',
       { className: 'fade-in' },
-      h(HeaderHero, { title: 'Perguntas Frequentes', subtitle: '' }),
+      h(HeaderHero, { title: 'Perguntas Frequentes', subtitle: 'FAQ sobre HIV e AIDS' }),
       h(
         'section',
         { className: 'faq-section' },
@@ -613,12 +568,21 @@ function writeThemeToLocation(newTheme) {
             },
             'Voltar'
           ),
-          h('input', {
-            className: 'faq-search',
-            placeholder: 'Buscar por palavra-chave…',
-            value: term,
-            onChange: (e) => setTerm(e.target.value),
-          })
+          h(
+            'div',
+            { className: 'search-input-wrapper' },
+            h('input', {
+              className: 'faq-search',
+              placeholder: 'Buscar por palavra-chave…',
+              value: term,
+              onChange: (e) => setTerm(e.target.value),
+            }),
+            term && h('button', {
+              className: 'search-clear-btn',
+              onClick: () => setTerm(''),
+              'aria-label': 'Limpar busca'
+            }, '✕')
+          )
         ),
         h('div', { className: 'faq-list' }, listContent)
       ),
@@ -775,35 +739,12 @@ function writeThemeToLocation(newTheme) {
                       'button',
                       {
                         type: 'button',
-                        className: `bot-audio-btn${
-                          isPlaying ? ' is-playing' : ''
-                        }`,
+                        className: 'audio-btn',
                         onClick: () => handleAudioToggle(faq),
                         'aria-pressed': isPlaying ? 'true' : 'false',
                         'aria-label': audioLabel,
                       },
-                      h(
-                        'span',
-                        {
-                          className: 'bot-audio-icon',
-                          'aria-hidden': 'true',
-                        },
-                        isPlaying ? '⏸️' : '🎧'
-                      ),
-                      h(
-                        'span',
-                        { className: 'bot-audio-label' },
-                        isPlaying
-                          ? 'Pausar'
-                          : 'Audiodescrição'
-                      ),
-                      faq.audioDurationLabel
-                        ? h(
-                            'span',
-                            { className: 'bot-audio-duration' },
-                            faq.audioDurationLabel
-                          )
-                        : null
+                      isPlaying ? '⏸️ Pausar' : '▶️ Audiodescrição'
                     )
                   : null
               ),
@@ -992,7 +933,10 @@ function writeThemeToLocation(newTheme) {
           },
           '← Voltar'
         ),
-        h('h1', { className: 'page-title' }, 'FAQ sobre HIV e AIDS'),
+        h('div', { className: 'page-header-content' },
+          h('h1', { className: 'page-title' }, 'Apresentação'),
+          h('p', { className: 'page-subtle' }, 'FAQ sobre HIV e AIDS')
+        ),
         h(
           'button',
           {
@@ -1027,9 +971,11 @@ function writeThemeToLocation(newTheme) {
             'button',
             {
               className: 'audio-btn',
+              type: 'button',
+              'aria-pressed': isPlaying ? 'true' : 'false',
               onClick: handleAudio
             },
-            `🎵 ${isPlaying ? 'Pausar' : 'Audiodescrição'}`
+            isPlaying ? '⏸️ Pausar' : '▶️ Audiodescrição'
           )
         )
       )
