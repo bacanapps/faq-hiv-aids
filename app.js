@@ -956,7 +956,7 @@ function writeThemeToLocation(newTheme) {
           'div',
           { className: 'presentation-heroimg-wrapper' },
           h('img', {
-            src: './assets/img/hero.png',
+            src: './assets/img/logo_aids_40anos.png',
             alt: 'FAQ sobre HIV e AIDS'
           })
         ),
