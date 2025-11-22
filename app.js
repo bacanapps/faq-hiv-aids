@@ -3,6 +3,52 @@
   const { useMemo, useState, useRef, useEffect, useCallback } = React;
   const h = React.createElement;
 
+  // ---- ANALYTICS TRACKER ----
+  const AnalyticsTracker = {
+    trackEvent(eventName, eventParams = {}) {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', eventName, eventParams);
+      }
+    },
+
+    trackPageView(pageName, pageTitle) {
+      this.trackEvent('page_view', {
+        page_title: pageTitle || pageName,
+        page_location: window.location.href,
+        page_path: window.location.pathname + window.location.hash,
+      });
+    },
+
+    trackFaqView(faqId, faqQuestion) {
+      this.trackEvent('faq_view', {
+        faq_id: faqId,
+        faq_question: faqQuestion,
+        content_type: 'faq',
+      });
+    },
+
+    trackAudioPlay(contentId, contentTitle) {
+      this.trackEvent('audio_play', {
+        content_id: contentId,
+        content_title: contentTitle,
+        content_type: 'audio',
+      });
+    },
+
+    trackSearch(searchTerm, resultCount) {
+      this.trackEvent('search', {
+        search_term: searchTerm,
+        result_count: resultCount,
+      });
+    },
+
+    trackThemeToggle(newTheme) {
+      this.trackEvent('theme_toggle', {
+        theme: newTheme,
+      });
+    },
+  };
+
   // ---- ROUTER (very light) ----
   const Routes = {
     HOME: 'home',
@@ -450,6 +496,16 @@ function writeThemeToLocation(newTheme) {
       return source.filter(({ searchText = '' }) => searchText.includes(t));
     }, [faqItems, term]);
 
+    // Track search queries with debounce
+    useEffect(() => {
+      const t = term.trim();
+      if (!t) return;
+      const timer = setTimeout(() => {
+        AnalyticsTracker.trackSearch(t, list.length);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }, [term, list.length]);
+
     // stop audio if the currently-playing item is filtered out
     useEffect(() => {
       if (!playingId) return;
@@ -462,6 +518,7 @@ function writeThemeToLocation(newTheme) {
     const handleAudioToggle = useCallback(
       (faq) => {
         toggleAudio(faq.id, faq.audioSrc);
+        AnalyticsTracker.trackAudioPlay(faq.id, faq.question);
       },
       [toggleAudio]
     );
@@ -513,7 +570,15 @@ function writeThemeToLocation(newTheme) {
 
         return h(
           'details',
-          { key: faq.id || faq.question, className: 'faq-item' },
+          {
+            key: faq.id || faq.question,
+            className: 'faq-item',
+            onToggle: (event) => {
+              if (event.target.open) {
+                AnalyticsTracker.trackFaqView(faq.id, faq.question);
+              }
+            },
+          },
           h(
             'summary',
             { className: 'faq-question' },
@@ -620,6 +685,16 @@ function writeThemeToLocation(newTheme) {
       return source.filter(({ searchText = '' }) => searchText.includes(t));
     }, [faqItems, term]);
 
+    // Track search queries with debounce
+    useEffect(() => {
+      const t = term.trim();
+      if (!t) return;
+      const timer = setTimeout(() => {
+        AnalyticsTracker.trackSearch(t, list.length);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }, [term, list.length]);
+
     // auto-stop audio if filtered
     useEffect(() => {
       if (!playingId) return;
@@ -632,6 +707,7 @@ function writeThemeToLocation(newTheme) {
     const handleAudioToggle = useCallback(
       (faq) => {
         toggleAudio(faq.id, faq.audioSrc);
+        AnalyticsTracker.trackAudioPlay(faq.id, faq.question);
       },
       [toggleAudio]
     );
@@ -914,6 +990,7 @@ function writeThemeToLocation(newTheme) {
 
     const handleAudio = useCallback(() => {
       toggleAudio(audioId, './assets/audio/presentation.mp3');
+      AnalyticsTracker.trackAudioPlay(audioId, 'Apresentação');
     }, [toggleAudio]);
 
     const handleBack = useCallback((e) => {
@@ -1034,9 +1111,24 @@ function writeThemeToLocation(newTheme) {
     writeThemeToLocation(theme);
   }, [theme]);
 
+  // Track page views when route changes
+  React.useEffect(() => {
+    const routeNames = {
+      [Routes.HOME]: 'Home',
+      [Routes.FAQ]: 'Perguntas Frequentes',
+      [Routes.BOT]: 'Bot',
+      [Routes.ABOUT]: 'Apresentação',
+    };
+    AnalyticsTracker.trackPageView(route, routeNames[route] || route);
+  }, [route]);
+
   // Toggle from button
   function toggleTheme() {
-    setTheme((t) => (t === "light" ? "dark" : "light"));
+    setTheme((t) => {
+      const newTheme = t === "light" ? "dark" : "light";
+      AnalyticsTracker.trackThemeToggle(newTheme);
+      return newTheme;
+    });
   }
 
   let screen;
