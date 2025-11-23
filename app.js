@@ -477,7 +477,7 @@ function writeThemeToLocation(newTheme) {
       ),
 
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${props.swVersion || "v23.11.25 16:45"}`
+        '© 2025 Dezembro Vermelho • Ministério da Saúde • v23.11.25 16:45'
       )
     );
   }
@@ -666,7 +666,7 @@ function writeThemeToLocation(newTheme) {
       ),
 
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${props.swVersion || "v23.11.25 16:45"}`
+        '© 2025 Dezembro Vermelho • Ministério da Saúde • v23.11.25 16:45'
       )
     );
   }
@@ -969,7 +969,7 @@ function writeThemeToLocation(newTheme) {
       ),
 
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${props.swVersion || "v23.11.25 16:45"}`
+        '© 2025 Dezembro Vermelho • Ministério da Saúde • v23.11.25 16:45'
       )
     );
   }
@@ -1070,7 +1070,7 @@ function writeThemeToLocation(newTheme) {
       ),
 
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${props.swVersion || "v23.11.25 16:45"}`
+        '© 2025 Dezembro Vermelho • Ministério da Saúde • v23.11.25 16:45'
       )
     );
   }
@@ -1104,23 +1104,6 @@ function writeThemeToLocation(newTheme) {
 
   // INITIAL THEME comes from URL (?theme=exhibit or ?theme=default)
   const [theme, setTheme] = React.useState(() => readThemeFromLocation());
-  const [swVersion, setSwVersion] = React.useState("v23.11.25 16:45");
-
-  // Fetch Service Worker version on mount
-  React.useEffect(() => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      const messageChannel = new MessageChannel();
-      messageChannel.port1.onmessage = (event) => {
-        if (event.data && event.data.version) {
-          setSwVersion(event.data.version);
-        }
-      };
-      navigator.serviceWorker.controller.postMessage(
-        { type: 'GET_VERSION' },
-        [messageChannel.port2]
-      );
-    }
-  }, []);
 
   // Sync React state -> <html data-theme="..."> AND -> URL search param
   React.useEffect(() => {
@@ -1153,29 +1136,25 @@ function writeThemeToLocation(newTheme) {
     screen = h(Faq, {
       onBack: () => navigate(Routes.HOME),
       onToggleTheme: toggleTheme,
-      currentTheme: theme,
-      swVersion
+      currentTheme: theme
     });
   } else if (route === Routes.BOT) {
     screen = h(Bot, {
       onBack: () => navigate(Routes.HOME),
       onToggleTheme: toggleTheme,
-      currentTheme: theme,
-      swVersion
+      currentTheme: theme
     });
   } else if (route === Routes.ABOUT) {
     screen = h(Presentation, {
       onBack: () => navigate(Routes.HOME),
       onToggleTheme: toggleTheme,
-      currentTheme: theme,
-      swVersion
+      currentTheme: theme
     });
   } else if (route === Routes.HOME) {
     screen = h(Home, {
       onNavigate: (nextRoute) => navigate(nextRoute),
       onToggleTheme: toggleTheme,
       currentTheme: theme,
-      swVersion
     });
   } else {
     screen = h(Placeholder, {
