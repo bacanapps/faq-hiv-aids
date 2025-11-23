@@ -1,5 +1,5 @@
 /* PWA Service Worker – safe for GitHub Pages subpaths */
-const VERSION = 'v3-' + Date.now(); // bump on each deploy to avoid stale caches
+const VERSION = "v23.11.25 16:45";
 const CACHE_NAME = `faq-cache-${VERSION}`;
 
 // Only cache the shell. Data is network-first.
@@ -79,4 +79,10 @@ self.addEventListener('fetch', (event) => {
       return cached || Response.error();
     }
   })());
+});
+/* Message handler: expose version to app */
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "GET_VERSION") {
+    event.ports[0].postMessage({ version: VERSION });
+  }
 });
