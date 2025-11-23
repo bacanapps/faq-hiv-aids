@@ -18,7 +18,7 @@ Interactive FAQ system about HIV and AIDS with search functionality, audio descr
 
 The app uses Google Analytics 4 (GA4) to track user interactions and content engagement. Analytics were added on 2025-11-22 to understand which FAQs are most viewed and how users interact with the app.
 
-**Measurement ID**: `G-Z3M9Z08L3V`
+**Measurement ID**: `G-W7XLCD3VKR`
 
 ### Tracked Events
 
@@ -104,45 +104,161 @@ The GA4 tracking script is loaded in the `<head>` section:
 
 ```html
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-Z3M9Z08L3V"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W7XLCD3VKR"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-Z3M9Z08L3V');
+  gtag('config', 'G-W7XLCD3VKR');
 </script>
 ```
 
 **Location**: `index.html:12-20`
 
-### Viewing Analytics Data
+### Viewing Analytics Data in Google Analytics 4
 
-To view FAQ analytics in Google Analytics:
+Follow these detailed steps to access and analyze FAQ metrics in your Google Analytics dashboard.
 
-1. **Most Viewed FAQs**:
-   - Go to Reports → Engagement → Events
-   - Click on `faq_view` event
-   - View by `faq_question` parameter to see which FAQs are most popular
+#### Accessing Google Analytics
 
-2. **Search Analytics**:
-   - Go to Reports → Engagement → Events
-   - Click on `search` event
-   - View by `search_term` parameter to see what users are searching for
+1. Navigate to [Google Analytics](https://analytics.google.com)
+2. Sign in with your Google account
+3. Select the property for **G-W7XLCD3VKR** (FAQ HIV e Aids)
 
-3. **Audio Engagement**:
-   - Go to Reports → Engagement → Events
-   - Click on `audio_play` event
-   - View by `content_title` to see which audio descriptions are most used
+#### Finding Most Accessed FAQs (Most Important)
 
-4. **Navigation Patterns**:
-   - Go to Reports → Engagement → Events
-   - Click on `page_view` event
-   - View by `page_title` to understand navigation flow
+This shows you which Perguntas Frequentes (FAQs) users are viewing most:
 
-5. **Theme Preferences**:
-   - Go to Reports → Engagement → Events
-   - Click on `theme_toggle` event
-   - View by `theme` parameter to see light vs. dark theme usage
+1. In the left sidebar, click **Reports**
+2. Click **Engagement** → **Events**
+3. In the events table, find and click on the **`faq_view`** event
+4. This shows total FAQ views. To see which specific FAQs:
+   - Look for the event parameters section below the chart
+   - Click on **`faq_question`** parameter
+   - You'll see a table showing:
+     - Each FAQ question text
+     - Number of times it was viewed
+     - Percentage of total views
+5. Click the column headers to sort by:
+   - **Event count** (descending) to see most popular FAQs first
+   - **FAQ question** (alphabetically)
+
+**Example interpretation**: If "O que é HIV?" has 150 views and "Como se transmite?" has 200 views, you know transmission questions are more searched.
+
+#### Alternative View: Custom Exploration
+
+For more detailed analysis:
+
+1. In the left sidebar, click **Explore**
+2. Click **Create a new exploration** or use a template
+3. Select **Free form** exploration
+4. Configure:
+   - **Dimensions**: Add `Event name` and `faq_question`
+   - **Metrics**: Add `Event count`
+   - **Filters**: Filter where `Event name` exactly matches `faq_view`
+5. Drag `faq_question` to **Rows**
+6. Drag `Event count` to **Values**
+7. Sort by event count to see top FAQs
+
+#### Finding Search Terms
+
+See what users are searching for to identify content gaps:
+
+1. Go to **Reports** → **Engagement** → **Events**
+2. Click on the **`search`** event
+3. View the **`search_term`** parameter to see:
+   - What keywords users search for
+   - Search terms with zero results (indicates missing content)
+   - Most common search queries
+
+#### Audio Engagement Analytics
+
+Track how many users listen to audio descriptions:
+
+1. Go to **Reports** → **Engagement** → **Events**
+2. Click on the **`audio_play`** event
+3. View by **`content_title`** to see which FAQ audio is played most
+4. Compare audio plays vs FAQ views to calculate audio adoption rate
+
+#### Page Navigation Flow
+
+Understand how users navigate through the app:
+
+1. Go to **Reports** → **Engagement** → **Events**
+2. Click on the **`page_view`** event
+3. View by **`page_title`** parameter to see:
+   - Home page visits
+   - FAQ page visits
+   - Presentation page visits
+   - Bot page visits
+
+#### Real-Time Monitoring
+
+See live user activity as it happens:
+
+1. In the left sidebar, click **Reports**
+2. Click **Realtime** → **Overview**
+3. View:
+   - Users currently on the app
+   - Events happening in real-time
+   - Which FAQs are being viewed right now
+
+#### Creating Custom Reports
+
+To create a dedicated FAQ analytics dashboard:
+
+1. Go to **Reports** → **Library**
+2. Click **Create new report**
+3. Select **Create detail report**
+4. Add these metrics:
+   - Event name = `faq_view`
+   - Dimension: `faq_question`
+   - Metric: `Event count`
+5. Save with a name like "Top FAQs Report"
+
+#### Exporting Data
+
+To export FAQ data for external analysis:
+
+1. Navigate to any report showing FAQ data
+2. Click the **Share** icon (top right)
+3. Select **Download file**
+4. Choose format: CSV, PDF, or Google Sheets
+5. Open in Excel/Sheets for further analysis
+
+#### Setting Up Alerts
+
+Get notified when specific FAQs become popular:
+
+1. Go to **Admin** → **Data Display** → **Custom Insights**
+2. Create insights based on:
+   - Spike in specific FAQ views
+   - New search terms appearing
+   - Drop in overall engagement
+
+#### Time-Based Analysis
+
+View FAQ popularity over time:
+
+1. Go to any event report
+2. Use the date range picker (top right) to select:
+   - Last 7 days
+   - Last 28 days
+   - Custom date range
+3. The chart will show trends over time
+4. Identify:
+   - Which FAQs trend during specific periods
+   - Seasonal patterns in questions
+   - Impact of external events on searches
+
+#### Recommended Weekly Review
+
+For ongoing monitoring, review these weekly:
+
+1. **Top 10 Most Viewed FAQs**: Track changes in popular topics
+2. **Top Search Terms**: Identify new user interests
+3. **Audio Play Rate**: Monitor accessibility feature usage
+4. **Zero-Result Searches**: Find content gaps to fill
 
 ## Technical Architecture
 
