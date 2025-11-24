@@ -5,7 +5,7 @@
 
   // ---- APP VERSION ----
   // Update this manually when deploying to reflect last GitHub update
-  const APP_VERSION = '24/11/2025, 07:40';
+  const APP_VERSION = '24/11/2025, 13:30';
   const getAppVersion = () => {
     return `(v. ${APP_VERSION})`;
   };
@@ -420,12 +420,12 @@ function writeThemeToLocation(newTheme) {
             h(
               'h1',
               { className: 'hero-title' },
-              'FAQ sobre HIV e AIDS'
+              'TIRA-DÚVIDAS SOBRE HIV E AIDS'
             ),
             h(
               'p',
               { className: 'hero-lede' },
-              'Informações confiáveis sobre prevenção, tratamento e convivência'
+              'Amplie seu conhecimento sobre prevenção, diagnóstico e cuidados com HIV e aids'
             )
           )
         )
@@ -451,7 +451,7 @@ function writeThemeToLocation(newTheme) {
             h(
               'p',
               { className: 'choice-desc' },
-              'Conheça mais sobre HIV e aids, sua história e cuidados de prevenção'
+              ''
             ),
             h(
               'div',
@@ -472,7 +472,7 @@ function writeThemeToLocation(newTheme) {
             h(
               'p',
               { className: 'choice-desc' },
-              'Mais de 30 perguntas e respostas sobre HIV e aids com busca inteligente'
+              ''
             ),
             h(
               'div',
