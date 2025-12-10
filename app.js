@@ -5,7 +5,7 @@
 
   // ---- APP VERSION ----
   // Update this manually when deploying to reflect last GitHub update
-  const APP_VERSION = '24/11/2025, 13:30';
+  const APP_VERSION = '10/12/2025, 20:20';
   const getAppVersion = () => {
     return `(v. ${APP_VERSION})`;
   };
@@ -54,7 +54,130 @@
         theme: newTheme,
       });
     },
+
+    trackLanguageToggle(newLanguage) {
+      this.trackEvent('language_toggle', {
+        language: newLanguage,
+        event_category: 'user_preference'
+      });
+    },
   };
+
+  // ---- TRANSLATIONS ----
+  const TRANSLATIONS = {
+    'pt-br': {
+      nav: {
+        voltar: 'Voltar'
+      },
+      home: {
+        heroTitle: 'TIRA-DÚVIDAS SOBRE HIV E AIDS',
+        heroLede: 'Amplie seu conhecimento sobre prevenção, diagnóstico e cuidados com HIV e aids',
+        cardApresentacao: {
+          title: 'Apresentação',
+          button: 'Explorar'
+        },
+        cardFaq: {
+          title: 'Perguntas Frequentes',
+          button: 'Explorar'
+        }
+      },
+      faq: {
+        title: 'Perguntas Frequentes',
+        subtitle: 'FAQ sobre HIV e AIDS',
+        searchPlaceholder: 'Buscar por palavra-chave…',
+        clearBtn: 'Limpar busca',
+        loading: 'Carregando perguntas…',
+        error: 'Erro ao carregar FAQs',
+        retry: 'Tentar novamente',
+        noResults: 'Nenhuma pergunta encontrada para esse termo.',
+        audioBtnPlay: '▶️ Audiodescrição',
+        audioBtnPause: '⏸️ Pausar'
+      },
+      apresentacao: {
+        title: 'Apresentação',
+        subtitle: 'FAQ sobre HIV e AIDS',
+        loading: 'Carregando…',
+        audioBtnPlay: '▶️ Audiodescrição',
+        audioBtnPause: '⏸️ Pausar'
+      },
+      common: {
+        themeToggleAria: 'Alternar tema visual',
+        languageToggleAria: 'Alternar idioma',
+        footer: '© 2025 Dezembro Vermelho • Ministério da Saúde'
+      }
+    },
+    'en': {
+      nav: {
+        voltar: 'Back'
+      },
+      home: {
+        heroTitle: 'HIV AND AIDS FAQ',
+        heroLede: 'Expand your knowledge about HIV and AIDS prevention, diagnosis, and care',
+        cardApresentacao: {
+          title: 'Introduction',
+          button: 'Explore'
+        },
+        cardFaq: {
+          title: 'Frequently Asked Questions',
+          button: 'Explore'
+        }
+      },
+      faq: {
+        title: 'Frequently Asked Questions',
+        subtitle: 'HIV and AIDS FAQ',
+        searchPlaceholder: 'Search by keyword…',
+        clearBtn: 'Clear search',
+        loading: 'Loading questions…',
+        error: 'Error loading FAQs',
+        retry: 'Try again',
+        noResults: 'No questions found for this term.',
+        audioBtnPlay: '▶️ Audio Description',
+        audioBtnPause: '⏸️ Pause'
+      },
+      apresentacao: {
+        title: 'Introduction',
+        subtitle: 'HIV and AIDS FAQ',
+        loading: 'Loading…',
+        audioBtnPlay: '▶️ Audio Description',
+        audioBtnPause: '⏸️ Pause'
+      },
+      common: {
+        themeToggleAria: 'Toggle visual theme',
+        languageToggleAria: 'Toggle language',
+        footer: '© 2025 Red December • Ministry of Health'
+      }
+    }
+  };
+
+  /**
+   * Translation helper function
+   * @param {string} language - The current language ('en' or 'pt-br')
+   * @param {string} key - The translation key path (e.g., 'home.heroTitle')
+   * @returns {string} The translated string
+   */
+  function t(language, key) {
+    const keys = key.split('.');
+    let value = TRANSLATIONS[language];
+
+    for (const k of keys) {
+      if (value && typeof value === 'object') {
+        value = value[k];
+      } else {
+        // Fallback to Portuguese if key not found
+        value = TRANSLATIONS['pt-br'];
+        for (const k2 of keys) {
+          if (value && typeof value === 'object') {
+            value = value[k2];
+          } else {
+            return key; // Return key if not found
+          }
+        }
+        break;
+      }
+    }
+
+    return value || key;
+  }
 
   // ---- ROUTER (very light) ----
   const Routes = {
@@ -347,6 +470,58 @@ function writeThemeToLocation(newTheme) {
     return [route, navigate];
   }
 
+  // ---- LANGUAGE HOOK ----
+  function useLanguage() {
+    const [language, setLanguage] = useState(() => {
+      // 1. Check URL parameter first (?lang=en)
+      const urlParams = new URLSearchParams(window.location.search);
+      const langParam = urlParams.get('lang');
+      if (langParam === 'en' || langParam === 'pt-br' || langParam === 'pt') {
+        return langParam === 'en' ? 'en' : 'pt-br';
+      }
+
+      // 2. Check localStorage
+      const saved = localStorage.getItem('faq-hiv-aids-language');
+      if (saved === 'en' || saved === 'pt-br') {
+        return saved;
+      }
+
+      // 3. Browser language detection (default)
+      const browserLang = navigator.language || navigator.userLanguage;
+      if (browserLang && browserLang.toLowerCase().startsWith('en')) {
+        return 'en';
+      }
+
+      // 4. Default to Portuguese
+      return 'pt-br';
+    });
+
+    const toggleLanguage = useCallback(() => {
+      setLanguage(current => {
+        const next = current === 'en' ? 'pt-br' : 'en';
+        localStorage.setItem('faq-hiv-aids-language', next);
+        document.documentElement.setAttribute('lang', next);
+
+        // Update URL parameter
+        const url = new URL(window.location);
+        url.searchParams.set('lang', next);
+        window.history.pushState({}, '', url);
+
+        // Track language change
+        AnalyticsTracker.trackLanguageToggle(next);
+
+        return next;
+      });
+    }, []);
+
+    // Apply language on mount
+    useEffect(() => {
+      document.documentElement.setAttribute('lang', language);
+    }, [language]);
+
+    return { language, toggleLanguage };
+  }
+
   // ---- REUSABLE HEADER HERO (used on FAQ / Placeholder, not Home anymore) ----
   const HeaderHero = ({ title, subtitle }) =>
     h(
@@ -391,7 +566,7 @@ function writeThemeToLocation(newTheme) {
   }
 
   // ---- PAGE: HOME ----
-  function Home({ onNavigate, onToggleTheme, currentTheme }) {
+  function Home({ onNavigate, onToggleTheme, currentTheme, language, toggleLanguage }) {
     return h(
       'div',
       { className: 'page fade-in' },
@@ -402,9 +577,21 @@ function writeThemeToLocation(newTheme) {
         {
           className: 'theme-toggle-btn',
           onClick: onToggleTheme,
-          'aria-label': 'Alternar tema'
+          'aria-label': t(language, 'common.themeToggleAria')
         },
         currentTheme === 'light' ? '🌙' : '☀️'
+      ),
+
+      // Language toggle button
+      h(
+        'button',
+        {
+          className: 'language-toggle-btn',
+          onClick: toggleLanguage,
+          'aria-label': t(language, 'common.languageToggleAria'),
+          style: { position: 'absolute', top: '16px', right: '60px' }
+        },
+        language === 'en' ? '🇧🇷 PT' : '🇬🇧 EN'
       ),
 
       // Hero section with gradient glass card
@@ -420,12 +607,12 @@ function writeThemeToLocation(newTheme) {
             h(
               'h1',
               { className: 'hero-title' },
-              'TIRA-DÚVIDAS SOBRE HIV E AIDS'
+              t(language, 'home.heroTitle')
             ),
             h(
               'p',
               { className: 'hero-lede' },
-              'Amplie seu conhecimento sobre prevenção, diagnóstico e cuidados com HIV e aids'
+              t(language, 'home.heroLede')
             )
           )
         )
@@ -447,7 +634,7 @@ function writeThemeToLocation(newTheme) {
               onClick: () => onNavigate(Routes.ABOUT)
             },
             h('div', { className: 'choice-icon' }, '📘'),
-            h('h2', { className: 'choice-title' }, 'Apresentação'),
+            h('h2', { className: 'choice-title' }, t(language, 'home.cardApresentacao.title')),
             h(
               'p',
               { className: 'choice-desc' },
@@ -456,7 +643,7 @@ function writeThemeToLocation(newTheme) {
             h(
               'div',
               { className: 'actions' },
-              h('button', { className: 'btn btn-primary' }, 'Explorar')
+              h('button', { className: 'btn btn-primary' }, t(language, 'home.cardApresentacao.button'))
             )
           ),
 
@@ -468,7 +655,7 @@ function writeThemeToLocation(newTheme) {
               onClick: () => onNavigate(Routes.FAQ)
             },
             h('div', { className: 'choice-icon' }, '❓'),
-            h('h2', { className: 'choice-title' }, 'Perguntas Frequentes'),
+            h('h2', { className: 'choice-title' }, t(language, 'home.cardFaq.title')),
             h(
               'p',
               { className: 'choice-desc' },
@@ -477,20 +664,26 @@ function writeThemeToLocation(newTheme) {
             h(
               'div',
               { className: 'actions' },
-              h('button', { className: 'btn btn-green' }, 'Explorar')
+              h('button', { className: 'btn btn-green' }, t(language, 'home.cardFaq.button'))
             )
           )
         )
       ),
 
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${getAppVersion()}`
+        h('span', null, `${t(language, 'common.footer')} • ${getAppVersion()}`),
+        h('button', {
+          className: 'footer-lang-toggle',
+          onClick: toggleLanguage,
+          'aria-label': t(language, 'common.languageToggleAria'),
+          style: { marginLeft: '12px', fontSize: '0.875rem', cursor: 'pointer', background: 'none', border: 'none', color: 'inherit' }
+        }, language === 'en' ? '🇧🇷 PT' : '🇬🇧 EN')
       )
     );
   }
 
   // ---- PAGE: FAQ ----
-  function Faq({ onBack, onToggleTheme, currentTheme }) {
+  function Faq({ onBack, onToggleTheme, currentTheme, language, toggleLanguage }) {
     const [term, setTerm] = useState('');
     const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
       useHowlerAudio();
@@ -498,9 +691,9 @@ function writeThemeToLocation(newTheme) {
 
     const list = useMemo(() => {
       const source = faqItems;
-      const t = term.trim().toLowerCase();
-      if (!t) return source;
-      return source.filter(({ searchText = '' }) => searchText.includes(t));
+      const q = term.trim().toLowerCase();
+      if (!q) return source;
+      return source.filter(({ searchText = '' }) => searchText.includes(q));
     }, [faqItems, term]);
 
     // Track search queries with debounce
@@ -540,7 +733,7 @@ function writeThemeToLocation(newTheme) {
         return h(
           'div',
           { className: 'state-message muted' },
-          'Carregando perguntas…'
+          t(language, 'faq.loading')
         );
       }
       if (error) {
@@ -558,7 +751,7 @@ function writeThemeToLocation(newTheme) {
                 reload();
               },
             },
-            'Tentar novamente'
+            t(language, 'faq.retry')
           )
         );
       }
@@ -566,14 +759,17 @@ function writeThemeToLocation(newTheme) {
         return h(
           'div',
           { className: 'state-message muted' },
-          'Nenhuma pergunta encontrada para esse termo.'
+          t(language, 'faq.noResults')
         );
       }
       return list.map((faq) => {
         const isPlaying = playingId === faq.id;
         const audioLabel = isPlaying
-          ? 'Pausar audiodescrição'
-          : 'Ouvir audiodescrição';
+          ? t(language, 'faq.audioBtnPause')
+          : t(language, 'faq.audioBtnPlay');
+
+        // Hide audio button when language is 'en'
+        const showAudioButton = language === 'pt-br' && faq.audioSrc;
 
         return h(
           'details',
@@ -594,7 +790,7 @@ function writeThemeToLocation(newTheme) {
               { className: 'faq-question-text' },
               faq.question || ''
             ),
-            faq.audioSrc
+            showAudioButton
               ? h(
                   'button',
                   {
@@ -628,7 +824,7 @@ function writeThemeToLocation(newTheme) {
     return h(
       'div',
       { className: 'fade-in' },
-      h(HeaderHero, { title: 'Perguntas Frequentes', subtitle: 'FAQ sobre HIV e AIDS' }),
+      h(HeaderHero, { title: t(language, 'faq.title'), subtitle: t(language, 'faq.subtitle') }),
       h(
         'section',
         { className: 'faq-section' },
@@ -642,21 +838,21 @@ function writeThemeToLocation(newTheme) {
               className: 'btn btn-green',
               onClick: handleBack,
             },
-            'Voltar'
+            t(language, 'nav.voltar')
           ),
           h(
             'div',
             { className: 'search-input-wrapper' },
             h('input', {
               className: 'faq-search',
-              placeholder: 'Buscar por palavra-chave…',
+              placeholder: t(language, 'faq.searchPlaceholder'),
               value: term,
               onChange: (e) => setTerm(e.target.value),
             }),
             term && h('button', {
               className: 'search-clear-btn',
               onClick: () => setTerm(''),
-              'aria-label': 'Limpar busca'
+              'aria-label': t(language, 'faq.clearBtn')
             }, '✕')
           )
         ),
@@ -667,13 +863,30 @@ function writeThemeToLocation(newTheme) {
         {
           className: 'theme-toggle-btn',
           onClick: onToggleTheme,
-          'aria-label': 'Alternar tema'
+          'aria-label': t(language, 'common.themeToggleAria')
         },
         currentTheme === 'light' ? '🌙' : '☀️'
       ),
 
+      h(
+        'button',
+        {
+          className: 'language-toggle-btn',
+          onClick: toggleLanguage,
+          'aria-label': t(language, 'common.languageToggleAria'),
+          style: { position: 'absolute', top: '16px', right: '60px' }
+        },
+        language === 'en' ? '🇧🇷 PT' : '🇬🇧 EN'
+      ),
+
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${getAppVersion()}`
+        h('span', null, `${t(language, 'common.footer')} • ${getAppVersion()}`),
+        h('button', {
+          className: 'footer-lang-toggle',
+          onClick: toggleLanguage,
+          'aria-label': t(language, 'common.languageToggleAria'),
+          style: { marginLeft: '12px', fontSize: '0.875rem', cursor: 'pointer', background: 'none', border: 'none', color: 'inherit' }
+        }, language === 'en' ? '🇧🇷 PT' : '🇬🇧 EN')
       )
     );
   }
@@ -982,7 +1195,7 @@ function writeThemeToLocation(newTheme) {
   }
 
   // ---- PAGE: PRESENTATION ----
-  function Presentation({ onBack, onToggleTheme, currentTheme }) {
+  function Presentation({ onBack, onToggleTheme, currentTheme, language, toggleLanguage }) {
     const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
       useHowlerAudio();
 
@@ -997,8 +1210,8 @@ function writeThemeToLocation(newTheme) {
 
     const handleAudio = useCallback(() => {
       toggleAudio(audioId, './assets/audio/presentation.mp3');
-      AnalyticsTracker.trackAudioPlay(audioId, 'Apresentação');
-    }, [toggleAudio]);
+      AnalyticsTracker.trackAudioPlay(audioId, t(language, 'apresentacao.title'));
+    }, [toggleAudio, language]);
 
     const handleBack = useCallback((e) => {
       e.preventDefault();
@@ -1012,6 +1225,9 @@ function writeThemeToLocation(newTheme) {
       <p>Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.</p>
       <p>Pergunte. O conhecimento transforma e salva vidas.</p>
     `;
+
+    // Hide audio button when language is 'en'
+    const showAudioButton = language === 'pt-br';
 
     return h(
       'div',
@@ -1027,20 +1243,30 @@ function writeThemeToLocation(newTheme) {
             className: 'back-link',
             onClick: handleBack
           },
-          '← Voltar'
+          `← ${t(language, 'nav.voltar')}`
         ),
         h('div', { className: 'page-header-content' },
-          h('h1', { className: 'page-title' }, 'Apresentação'),
-          h('p', { className: 'page-subtle' }, 'FAQ sobre HIV e AIDS')
+          h('h1', { className: 'page-title' }, t(language, 'apresentacao.title')),
+          h('p', { className: 'page-subtle' }, t(language, 'apresentacao.subtitle'))
         ),
         h(
           'button',
           {
             className: 'theme-toggle-btn',
             onClick: onToggleTheme,
-            'aria-label': 'Alternar tema'
+            'aria-label': t(language, 'common.themeToggleAria')
           },
           currentTheme === 'light' ? '🌙' : '☀️'
+        ),
+        h(
+          'button',
+          {
+            className: 'language-toggle-btn',
+            onClick: toggleLanguage,
+            'aria-label': t(language, 'common.languageToggleAria'),
+            style: { position: 'absolute', top: '16px', right: '60px' }
+          },
+          language === 'en' ? '🇧🇷 PT' : '🇬🇧 EN'
         )
       ),
 
@@ -1053,14 +1279,14 @@ function writeThemeToLocation(newTheme) {
           { className: 'presentation-heroimg-wrapper' },
           h('img', {
             src: './assets/img/logo_aids_40anos.png',
-            alt: 'FAQ sobre HIV e AIDS'
+            alt: t(language, 'apresentacao.subtitle')
           })
         ),
         h('div', {
           className: 'presentation-textblock',
           dangerouslySetInnerHTML: { __html: presentationHtml }
         }),
-        h(
+        showAudioButton && h(
           'div',
           { className: 'audio-row' },
           h(
@@ -1071,13 +1297,19 @@ function writeThemeToLocation(newTheme) {
               'aria-pressed': isPlaying ? 'true' : 'false',
               onClick: handleAudio
             },
-            isPlaying ? '⏸️ Pausar' : '▶️ Audiodescrição'
+            isPlaying ? t(language, 'apresentacao.audioBtnPause') : t(language, 'apresentacao.audioBtnPlay')
           )
         )
       ),
 
       h('div', { className: 'app-footer-line' },
-        `© 2025 Dezembro Vermelho • Ministério da Saúde • ${getAppVersion()}`
+        h('span', null, `${t(language, 'common.footer')} • ${getAppVersion()}`),
+        h('button', {
+          className: 'footer-lang-toggle',
+          onClick: toggleLanguage,
+          'aria-label': t(language, 'common.languageToggleAria'),
+          style: { marginLeft: '12px', fontSize: '0.875rem', cursor: 'pointer', background: 'none', border: 'none', color: 'inherit' }
+        }, language === 'en' ? '🇧🇷 PT' : '🇬🇧 EN')
       )
     );
   }
@@ -1105,12 +1337,15 @@ function writeThemeToLocation(newTheme) {
     );
   }
 
-  // ---- TOP-LEVEL APP (router switch + theme) ----
+  // ---- TOP-LEVEL APP (router switch + theme + language) ----
   function App() {
   const [route, navigate] = useRoute();
 
   // INITIAL THEME comes from URL (?theme=exhibit or ?theme=default)
   const [theme, setTheme] = React.useState(() => readThemeFromLocation());
+
+  // Language hook
+  const { language, toggleLanguage } = useLanguage();
 
   // Sync React state -> <html data-theme="..."> AND -> URL search param
   React.useEffect(() => {
@@ -1143,7 +1378,9 @@ function writeThemeToLocation(newTheme) {
     screen = h(Faq, {
       onBack: () => navigate(Routes.HOME),
       onToggleTheme: toggleTheme,
-      currentTheme: theme
+      currentTheme: theme,
+      language,
+      toggleLanguage
     });
   } else if (route === Routes.BOT) {
     screen = h(Bot, {
@@ -1155,13 +1392,17 @@ function writeThemeToLocation(newTheme) {
     screen = h(Presentation, {
       onBack: () => navigate(Routes.HOME),
       onToggleTheme: toggleTheme,
-      currentTheme: theme
+      currentTheme: theme,
+      language,
+      toggleLanguage
     });
   } else if (route === Routes.HOME) {
     screen = h(Home, {
       onNavigate: (nextRoute) => navigate(nextRoute),
       onToggleTheme: toggleTheme,
       currentTheme: theme,
+      language,
+      toggleLanguage
     });
   } else {
     screen = h(Placeholder, {
