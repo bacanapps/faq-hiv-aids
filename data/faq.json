@@ -2,7 +2,9 @@
   {
     "id": "pergunta1",
     "question": "Posso pegar HIV apertando a mão ou estando ao lado de uma pessoa infectada que espirra ou tosse?",
+    "questionEn": "Can I get HIV by shaking hands or being next to an infected person who sneezes or coughs?",
     "answerHtml": "<p>Não existe risco de se infectar em banheiros públicos ou compartilhando roupas, utensílios, talheres ou copos com alguém vivendo com HIV; tampouco se transmite por abraços ou beijos. O HIV é transmitido por fluidos corporais específicos, principalmente em relações sexuais sem preservativo, por transmissão vertical durante a gestação, parto ou amamentação sem tratamento adequado ou pelo compartilhamento de seringas contaminadas.</p>",
+    "answerHtmlEn": "<p>There is no risk of infection in public restrooms or by sharing clothes, utensils, cutlery, or glasses with someone living with HIV, nor is the virus transmitted through hugs or kisses. HIV is transmitted through specific bodily fluids, mainly during sexual intercourse without a condom, through vertical transmission during pregnancy, childbirth, or breastfeeding without proper treatment, or by sharing contaminated syringes.</p>",
     "audioDescription": { "src": "/assets/audio/faq1.mp3", "durationSec": 37 },
     "tags": ["transmissão", "mitos"],
     "sources": []
@@ -10,7 +12,9 @@
   {
     "id": "pergunta2",
     "question": "HIV é a mesma coisa que aids?",
+    "questionEn": "Is HIV the same thing as AIDS?",
     "answerHtml": "<p>Não. Se não for tratado, o HIV pode ocasionar a aids, um estágio avançado da infecção, quando o sistema imunológico já está gravemente enfraquecido. O tratamento pode ajudar mesmo em fases avançadas e salvar vidas, mas quem inicia o uso dos medicamentos logo após a infecção tem muito mais qualidade de vida, por isso o diagnóstico precoce é tão importante.</p>",
+    "answerHtmlEn": "<p>No. If left untreated, HIV can lead to AIDS, an advanced stage of infection when the immune system is already severely compromised. Treatment can help even in advanced stages of AIDS and save lives, but those who start taking medication soon after infection have a much better quality of life, which is why early diagnosis is so important.</p>",
     "audioDescription": { "src": "/assets/audio/faq2.mp3", "durationSec": 30 },
     "tags": ["conceitos"],
     "sources": []
@@ -18,7 +22,9 @@
   {
     "id": "pergunta3",
     "question": "Posso pegar HIV beijando alguém?",
+    "questionEn": "Can I get HIV from kissing someone?",
     "answerHtml": "<p>Não. O HIV não se transmite em gestos do dia a dia, na escola ou no trabalho. Não se pega HIV apertando a mão, abraçando, usando o mesmo banheiro, bebendo no mesmo copo ou ficando perto de alguém que tosse ou espirra.</p>",
+    "answerHtmlEn": "<p>No. HIV is not transmitted through everyday activities, at school, or at work. You cannot get HIV from shaking hands, hugging, using the same bathroom, drinking from the same cup, or being near someone who coughs or sneezes.</p>",
     "audioDescription": { "src": "/assets/audio/faq3.mp3", "durationSec": 18 },
     "tags": ["transmissão", "mitos"],
     "sources": []
@@ -26,7 +32,9 @@
   {
     "id": "pergunta4",
     "question": "Picada de mosquito transmite HIV?",
+    "questionEn": "Can mosquito bites transmit HIV?",
     "answerHtml": "<p>Não. Insetos como mosquitos não podem transmitir o HIV. Mesmo que ingiram sangue infectado, o vírus não se reproduz neles. Como não podem ser infectados, também não transmitem o HIV a humanos.</p>",
+    "answerHtmlEn": "<p>No. Insects such as mosquitoes cannot transmit HIV. Even if mosquitoes ingest infected blood, the virus does not reproduce in them. Since they cannot be infected, they also cannot transmit HIV to humans.</p>",
     "audioDescription": { "src": "/assets/audio/faq4.mp3", "durationSec": 17 },
     "tags": ["transmissão", "mitos"],
     "sources": []
@@ -34,7 +42,9 @@
   {
     "id": "pergunta5",
     "question": "O HIV afeta apenas pessoas homossexuais ou pessoas que usam drogas?",
+    "questionEn": "Does HIV only affect homosexuals or people who use drugs?",
     "answerHtml": "<p>Não. Qualquer pessoa pode se infectar via relação sexual sem preservativo, compartilhamento de agulhas contaminadas ou por transmissão vertical durante a gestação, parto ou amamentação sem tratamento e orientação adequados.</p>",
+    "answerHtmlEn": "<p>No. Anyone can become infected through unprotected sex, by sharing contaminated needles, or through vertical transmission during pregnancy, childbirth, or breastfeeding, without proper treatment and guidance.</p>",
     "audioDescription": { "src": "/assets/audio/faq5.mp3", "durationSec": 20 },
     "tags": ["preconceito"],
     "sources": []
@@ -42,7 +52,9 @@
   {
     "id": "pergunta6",
     "question": "É possível saber se alguém tem HIV ou aids apenas olhando?",
+    "questionEn": "Is it possible to tell if someone has HIV or AIDS just by looking at them?",
     "answerHtml": "<p>Não. Uma pessoa vivendo com HIV ou aids pode parecer saudável e se sentir bem. Apenas o teste de HIV confirma a infecção. Sintomas estereotipados associados ao HIV e à aids geralmente estão ligados a complicações de doenças relacionadas à aids, mas com o tratamento, não aparecem.</p>",
+    "answerHtmlEn": "<p>No. A person living with HIV or AIDS may look healthy and feel well. Only an HIV test can confirm infection. Stereotypical symptoms associated with HIV and AIDS are usually linked to complications from AIDS-related illnesses, but with treatment, they do not appear.</p>",
     "audioDescription": { "src": "/assets/audio/faq6.mp3", "durationSec": 24 },
     "tags": ["diagnóstico"],
     "sources": []
@@ -50,7 +62,9 @@
   {
     "id": "pergunta7",
     "question": "Preservativos funcionam contra o HIV e a aids?",
+    "questionEn": "Do condoms work against HIV and AIDS?",
     "answerHtml": "<p>Sim. Quando usados corretamente, os preservativos são altamente eficazes na prevenção de HIV, outras ISTs e da gravidez indesejada. O essencial é aprender a usá-los de forma adequada.</p>",
+    "answerHtmlEn": "<p>Yes. When used correctly, they are highly effective in preventing HIV, other sexually transmitted infections (STIs), and unwanted pregnancy. The key is to learn how to use them properly.</p>",
     "audioDescription": { "src": "/assets/audio/faq7.mp3", "durationSec": 19 },
     "tags": ["prevenção"],
     "sources": []
@@ -58,7 +72,9 @@
   {
     "id": "pergunta8",
     "question": "Por que fazer o teste de HIV?",
+    "questionEn": "Why get tested for HIV?",
     "answerHtml": "<p>Saber o status sorológico tem dois benefícios: se a pessoa for HIV-positiva, pode iniciar o tratamento logo e prolongar a vida com qualidade, além de tomar medidas para não transmitir o vírus às parcerias sexuais ou via transmissão vertical; e se for negativa, pode reforçar medidas de prevenção.</p>",
+    "answerHtmlEn": "<p>Knowing your HIV status has several benefits: if you are HIV-positive, you can start treatment early, live longer, and enjoy a better quality of life, as well as take measures to prevent transmission of the virus to sexual partners or even through vertical transmission. If you are HIV-negative, you can continue to take precautions, looking after your own health and that of your partners.</p>",
     "audioDescription": { "src": "/assets/audio/faq8.mp3", "durationSec": 25 },
     "tags": ["diagnóstico"],
     "sources": []
@@ -66,7 +82,9 @@
   {
     "id": "pergunta9",
     "question": "O que significa indetectável = intransmissível = zero risco?",
+    "questionEn": "What does undetectable = untransmittable = zero risk mean?",
     "answerHtml": "<p>Significa que uma pessoa vivendo com HIV ou aids em tratamento, com carga viral indetectável, não transmite HIV em relações sexuais e tem zero risco de transmiti-lo independentemente da prática (vaginal, anal ou oral).</p>",
+    "answerHtmlEn": "<p>It means that a person living with HIV or AIDS who is undergoing treatment and has an undetectable viral load does not transmit HIV through sexual intercourse and has zero risk of transmitting it regardless of the sexual practice (vaginal, anal, or oral).</p>",
     "audioDescription": { "src": "/assets/audio/faq9.mp3", "durationSec": 21 },
     "tags": ["tratamento", "prevenção"],
     "sources": []
@@ -74,7 +92,9 @@
   {
     "id": "pergunta10",
     "question": "Uma pessoa vivendo com HIV pode transmitir para o bebê durante a gravidez ou amamentação?",
+    "questionEn": "Can a person living with HIV transmit the virus to their baby during pregnancy or breastfeeding?",
     "answerHtml": "<p>Sim. Sem tratamento adequado há risco de transmissão durante a gestação, parto e amamentação. Porém, se a pessoa estiver em terapia antirretroviral e com carga viral indetectável, o risco de transmissão é zero.</p>",
+    "answerHtmlEn": "<p>Yes. Without proper treatment, there is a risk of transmission during pregnancy, childbirth, and breastfeeding. However, if the person is on antiretroviral therapy and has an undetectable viral load, the risk of transmission is zero.</p>",
     "audioDescription": { "src": "/assets/audio/faq10.mp3", "durationSec": 22 },
     "tags": ["transmissão", "gestação"],
     "sources": []
@@ -82,7 +102,9 @@
   {
     "id": "pergunta11",
     "question": "Existe cura ou vacina contra o HIV e aids?",
+    "questionEn": "Is there a cure or vaccine for HIV and AIDS?",
     "answerHtml": "<p>Ainda não existe cura ou vacina específica, mas os antirretrovirais adotados no tratamento disponível no SUS, se usados corretamente, permitem viver com saúde e impedem a transmissão. Recentemente, foi anunciada uma injeção semestral do antirretroviral chamado lenacapavir. Segundo as pesquisas, o medicamento, que deve ser aplicado semestralmente, é capaz de prevenir a infecção.</p>",
+    "answerHtmlEn": "<p>There is still no specific cure or vaccine, but the antiretroviral drugs used in the treatment available in the SUS (Brazilian Unified Health System), if used correctly, allow people to live healthily and prevent the transmission of HIV. Recently, an injection of the antiretroviral drug called lenacapavir was announced. According to research, the drug—which must be administered every six months—is capable of preventing infection.</p>",
     "audioDescription": { "src": "/assets/audio/faq11.mp3", "durationSec": 32 },
     "tags": ["tratamento", "pesquisa"],
     "sources": []

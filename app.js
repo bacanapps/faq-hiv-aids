@@ -5,7 +5,7 @@
 
   // ---- APP VERSION ----
   // Update this manually when deploying to reflect last GitHub update
-  const APP_VERSION = '11/12/2025, 10:00';
+  const APP_VERSION = '11/12/2025, 11:11';
   const getAppVersion = () => {
     return `(v. ${APP_VERSION})`;
   };
@@ -98,7 +98,8 @@
         subtitle: 'FAQ sobre HIV e AIDS',
         loading: 'Carregando…',
         audioBtnPlay: '▶️ Audiodescrição',
-        audioBtnPause: '⏸️ Pausar'
+        audioBtnPause: '⏸️ Pausar',
+        introHtml: '<p>Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.</p><p>Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo.</p><p>Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.</p><p>Pergunte. O conhecimento transforma e salva vidas.</p>'
       },
       common: {
         themeToggleAria: 'Alternar tema visual',
@@ -111,20 +112,20 @@
         voltar: 'Back'
       },
       home: {
-        heroTitle: 'HIV AND AIDS FAQ',
+        heroTitle: 'FAQs ABOUT HIV AND AIDS',
         heroLede: 'Expand your knowledge about HIV and AIDS prevention, diagnosis, and care',
         cardApresentacao: {
-          title: 'Introduction',
+          title: 'Presentation',
           button: 'Explore'
         },
         cardFaq: {
-          title: 'Frequently Asked Questions',
+          title: 'Questions and Answers',
           button: 'Explore'
         }
       },
       faq: {
-        title: 'Frequently Asked Questions',
-        subtitle: 'HIV and AIDS FAQ',
+        title: 'Question and Answers',
+        subtitle: 'FAQs ABOUT HIV AND AIDS',
         searchPlaceholder: 'Search by keyword…',
         clearBtn: 'Clear search',
         loading: 'Loading questions…',
@@ -136,10 +137,11 @@
       },
       apresentacao: {
         title: 'Introduction',
-        subtitle: 'HIV and AIDS FAQ',
+        subtitle: 'FAQs ABOUT HIV AND AIDS',
         loading: 'Loading…',
         audioBtnPlay: '▶️ Audio Description',
-        audioBtnPause: '⏸️ Pause'
+        audioBtnPause: '⏸️ Pause',
+        introHtml: '<p>In a world where health information is often lost amid myths and contradictions, we present our interactive FAQ on HIV and AIDS, a knowledge tool designed for you.</p><p>Our mission is straightforward: to ensure that you have access to up-to-date, scientifically validated data.</p><p>Here, you can ask questions and receive instant, reliable answers about HIV and aids.</p><p>Fear of judgement and shame often prevent people from asking essential questions about their health. Here, you will find a neutral space, with complete discretion and confidentiality.</p><p>This democratization of knowledge is a fundamental step toward enabling you to make informed decisions about your health and demystifying HIV and AIDS. By facilitating access to accurate, unbiased information, we help build a more empathetic and stigma-free society.</p><p>So ask. Knowledge transforms and saves lives.</p>'
       },
       common: {
         themeToggleAria: 'Toggle visual theme',
@@ -265,15 +267,27 @@ function writeThemeToLocation(newTheme) {
           audioDescription.duration ??
           null;
 
+        // Include English translations if available
+        const questionEn = item.questionEn || '';
+        const answerHtmlEn = item.answerHtmlEn || '';
+        const answerTextEn = answerHtmlEn ? stripHtml(answerHtmlEn) : '';
+
+        // Build searchText with both Portuguese and English content
+        const searchParts = [question, answerText, ...tags];
+        if (questionEn) searchParts.push(questionEn);
+        if (answerTextEn) searchParts.push(answerTextEn);
+
         return {
           id: item.id || item.slug || question,
           question,
+          questionEn,
           answerHtml: baseHtml || `<p>${answerText}</p>`,
+          answerHtmlEn,
           answerText,
           tags,
           audioSrc,
           audioDurationLabel: formatDuration(durationSec),
-          searchText: `${question} ${answerText} ${tags.join(' ')}`.toLowerCase(),
+          searchText: searchParts.join(' ').toLowerCase(),
         };
       })
       .filter(Boolean);
@@ -716,10 +730,11 @@ function writeThemeToLocation(newTheme) {
 
     const handleAudioToggle = useCallback(
       (faq) => {
+        const displayQuestion = language === 'en' && faq.questionEn ? faq.questionEn : faq.question;
         toggleAudio(faq.id, faq.audioSrc);
-        AnalyticsTracker.trackAudioPlay(faq.id, faq.question);
+        AnalyticsTracker.trackAudioPlay(faq.id, displayQuestion);
       },
-      [toggleAudio]
+      [toggleAudio, language]
     );
 
     const handleBack = useCallback(() => {
@@ -770,6 +785,10 @@ function writeThemeToLocation(newTheme) {
         // Hide audio button when language is 'en'
         const showAudioButton = language === 'pt-br' && faq.audioSrc;
 
+        // Select language-appropriate content
+        const displayQuestion = language === 'en' && faq.questionEn ? faq.questionEn : faq.question;
+        const displayAnswer = language === 'en' && faq.answerHtmlEn ? faq.answerHtmlEn : faq.answerHtml;
+
         return h(
           'details',
           {
@@ -777,7 +796,7 @@ function writeThemeToLocation(newTheme) {
             className: 'faq-item',
             onToggle: (event) => {
               if (event.target.open) {
-                AnalyticsTracker.trackFaqView(faq.id, faq.question);
+                AnalyticsTracker.trackFaqView(faq.id, displayQuestion);
               }
             },
           },
@@ -787,7 +806,7 @@ function writeThemeToLocation(newTheme) {
             h(
               'span',
               { className: 'faq-question-text' },
-              faq.question || ''
+              displayQuestion || ''
             ),
             showAudioButton
               ? h(
@@ -814,7 +833,7 @@ function writeThemeToLocation(newTheme) {
           ),
           h('div', {
             className: 'faq-answer muted',
-            dangerouslySetInnerHTML: { __html: faq.answerHtml },
+            dangerouslySetInnerHTML: { __html: displayAnswer },
           })
         );
       });
@@ -890,7 +909,7 @@ function writeThemeToLocation(newTheme) {
   }
 
   // ---- PAGE: BOT ----
-  function Bot({ onBack, onToggleTheme, currentTheme }) {
+  function Bot({ onBack, onToggleTheme, currentTheme, language, toggleLanguage }) {
     const [term, setTerm] = useState('');
     const { playingId, toggle: toggleAudio, teardown: teardownAudio } =
       useHowlerAudio();
@@ -924,10 +943,11 @@ function writeThemeToLocation(newTheme) {
 
     const handleAudioToggle = useCallback(
       (faq) => {
+        const displayQuestion = language === 'en' && faq.questionEn ? faq.questionEn : faq.question;
         toggleAudio(faq.id, faq.audioSrc);
-        AnalyticsTracker.trackAudioPlay(faq.id, faq.question);
+        AnalyticsTracker.trackAudioPlay(faq.id, displayQuestion);
       },
-      [toggleAudio]
+      [toggleAudio, language]
     );
 
     const handleBack = useCallback(() => {
@@ -1025,6 +1045,11 @@ function writeThemeToLocation(newTheme) {
             const audioLabel = isPlaying
               ? 'Pausar audiodescrição'
               : 'Ouvir audiodescrição';
+
+            // Select language-appropriate content
+            const displayQuestion = language === 'en' && faq.questionEn ? faq.questionEn : faq.question;
+            const displayAnswer = language === 'en' && faq.answerHtmlEn ? faq.answerHtmlEn : faq.answerHtml;
+
             return h(
               'article',
               { key: faq.id || faq.question, className: 'bot-result' },
@@ -1034,7 +1059,7 @@ function writeThemeToLocation(newTheme) {
                 h(
                   'h3',
                   { className: 'bot-result-title' },
-                  faq.question || ''
+                  displayQuestion || ''
                 ),
                 faq.audioSrc
                   ? h(
@@ -1071,7 +1096,7 @@ function writeThemeToLocation(newTheme) {
                 : null,
               h('div', {
                 className: 'bot-result-body muted',
-                dangerouslySetInnerHTML: { __html: faq.answerHtml },
+                dangerouslySetInnerHTML: { __html: displayAnswer },
               })
             );
           })
@@ -1217,12 +1242,7 @@ function writeThemeToLocation(newTheme) {
       onBack();
     }, [teardownAudio, onBack]);
 
-    const presentationHtml = `
-      <p>Em um mundo onde a informação sobre HIV e aids muitas vezes se perde em mitos e contradições, apresentamos o nosso tira-dúvidas interativo sobre HIV e aids, uma ferramenta de conhecimento pensada para você.</p>
-      <p>Nossa missão é simples: garantir que você tenha acesso a dados atualizados e cientificamente validados. Aqui, você pode fazer perguntas e receber respostas instantâneas e confiáveis sobre HIV e aids. O medo do julgamento e a vergonha frequentemente impedem as pessoas de fazer perguntas essenciais sobre sua saúde. Por aqui, você encontra um ambiente de neutralidade, total discrição e sigilo.</p>
-      <p>Essa democratização do conhecimento é um passo fundamental para que você possa tomar decisões informadas sobre sua saúde e desmistificar o HIV e a aids. Ao facilitar o acesso à informação correta e sem preconceitos, ajudamos a construir uma sociedade mais empática e livre de estigmas.</p>
-      <p>Pergunte. O conhecimento transforma e salva vidas.</p>
-    `;
+    const presentationHtml = t(language, 'apresentacao.introHtml');
 
     // Hide audio button when language is 'en'
     const showAudioButton = language === 'pt-br';
@@ -1384,7 +1404,9 @@ function writeThemeToLocation(newTheme) {
     screen = h(Bot, {
       onBack: () => navigate(Routes.HOME),
       onToggleTheme: toggleTheme,
-      currentTheme: theme
+      currentTheme: theme,
+      language,
+      toggleLanguage
     });
   } else if (route === Routes.ABOUT) {
     screen = h(Presentation, {

@@ -1,0 +1,534 @@
+/* App-specific styles to approximate the visual style from the reference site.
+    Modular and easy to update. This complements Tailwind but keeps a few
+    reusable components for cards, buttons and audio controls. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* New Color Scheme - "A História Cantada da AIDS" */
+:root {
+  --primary:#ff0000; /* red */
+  --accent:#8b5cf6; /* purple */
+  --surface:#bcbcbc;
+  --panel:#f4f4f4;
+  --muted:#5d5d5d;
+  --text-primary:#5d5d5d;
+  --font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Dark theme overrides */
+:root[data-theme="dark"] {
+  --surface: #0f172a;
+  --panel: rgba(30,41,59,0.6);
+  --muted: #94a3b8;
+  --text-primary: #e2e8f0;
+}
+
+:root[data-theme="dark"] .choice-desc  {
+  color: #ffffff !important;
+}
+:root[data-theme="dark"] .choice-title  {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .hero-title {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .hero-lede {
+  color: #ffffff !important;
+}
+
+:root[data-theme="dark"] .choice-card.glass-card.card-hover {
+  background: linear-gradient(180deg, var(--panel) 0%, rgba(255, 255, 255, 0.03) 100%);!important;
+}
+
+
+:root[data-theme="dark"] .hero.hero-gradient.glass-card {
+  background: linear-gradient(180deg, var(--panel) 0%, rgba(255, 255, 255, 0.03) 100%); !important;
+}
+
+/* Light theme overrides */
+:root[data-theme="light"] {
+  --surface: #bcbcbc;
+  --panel: rgba(255, 255, 255, 0.95);
+  --muted: #6b7280;
+  --text-primary: #5d5d5d;
+}
+
+body{font-family:var(--font-family); background: var(--surface); color: var(--text-primary); transition: background-color 0.3s ease, color 0.3s ease;}
+
+/* Quiz questions */
+h2.text-2xl.font-semibold.flex-1 {
+    color: #ff0000;
+}
+
+/* Quiz bg */
+.w-full.max-w-3xl.glass-effect.rounded-xl.p-6.md\:p-8 {
+    background-color: #f4f4f4;
+}
+
+/* Quiz question text selected*/
+button.w-full.block.text-left.px-4.py-3.rounded-lg.border.transition-colors.border-gray-600.hover\:bg-gray-700\/60.text-gray-200.border-blue-500 {
+    color: #ff0000
+}
+
+/* Quiz question text */
+button.w-full.block.text-left.px-4.py-3.rounded-lg.border.transition-colors.border-gray-600.hover\:bg-gray-700\/60.text-gray-200 {
+    color: #6b0300;
+}
+
+/* Quiz score page*/
+.text-gray-400 {
+    --tw-text-opacity: 1;
+    color: #6b0300;
+}
+
+p.text-lg.text-gray-300.mb-8 {
+    color: #6b0300;
+}
+
+h2.text-3xl.md\:text-4xl.font-bold.mb-4 {
+    color: #ff0000;
+}
+
+/* Card */
+.card-panel{
+  background: linear-gradient(180deg, rgba(17,24,39,0.7), rgba(17,24,39,0.65));
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+}
+
+/* Large hero title style */
+.hero-title{
+  color: #ff0000 !important;
+  font-weight:700;
+  font-size: 1.75rem;
+}
+
+/* Audio button */
+.btn-audio{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  background: linear-gradient(180deg,var(--primary), #1e40af);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight:600;
+  box-shadow: 0 6px 12px rgba(37,99,235,0.12);
+}
+.btn-audio.secondary{
+  background: linear-gradient(180deg,#6ee7b7,#10b981);
+  box-shadow: 0 6px 12px rgba(16,185,129,0.08);
+}
+.btn-audio:active{transform:translateY(1px)}
+
+.btn-audio .icon{
+  font-size:1.05rem;
+}
+
+/* Player controls mimic */
+.player-row{
+  display:flex;align-items:center;gap:12px;margin-top:10px;
+}
+.player-progress{
+  height:6px;background:rgba(255,255,255,0.06);border-radius:6px;flex:1;position:relative;overflow:hidden;
+}
+.player-progress > .bar{height:100%;background:var(--primary);width:0%;}
+
+/* Language pills (from attachment) */
+.lang-pills{display:flex;gap:8px;margin-top:14px}
+.lang-pills .pill{background:#3b0b0b;color:#fff;padding:6px 10px;border-radius:999px;font-weight:600}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid rgba(0,0,0,0.1);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+.theme-toggle-btn:hover {
+  background: rgba(255,255,255,0.9);
+  transform: scale(1.1);
+}
+.theme-toggle-btn:active {
+  transform: scale(1.05);
+}
+:root[data-theme="dark"] .theme-toggle-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+:root[data-theme="dark"] .theme-toggle-btn:hover {
+  background: rgba(30, 41, 59, 0.8);
+  transform: scale(1.1);
+}
+:root[data-theme="light"] .theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #1a1a1a;
+}
+:root[data-theme="light"] .theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.1);
+}
+
+/* small utilities */
+.mb-8{margin-bottom:2rem}
+.mt-4{margin-top:1rem}
+
+/* Make the button text slightly larger for accessibility */
+.btn-audio{font-size:0.95rem}
+
+/* responsive tweaks */
+@media (min-width:768px){
+  .hero-title{font-size:2.4rem}
+}
+
+/* Additional utility variables */
+:root {
+  --secondary: #10b981;
+  --secondary-dark: #059669;
+  --accent-dark: #7c3aed;
+  --text-secondary: #cbd5e1;
+  --border: #475569;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; height: 100%; overscroll-behavior: none; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--surface); color: var(--text-primary); }
+
+.glass-effect { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(71, 85, 105, 0.3); }
+
+.gradient-primary { background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%); }
+.gradient-secondary { background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%); }
+.gradient-accent { background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%); }
+
+.card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3), 0 10px 10px -5px rgba(0,0,0,0.1); }
+
+.button-modern { position: relative; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 500; letter-spacing: 0.025em; }
+.button-modern:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); }
+.button-modern:active { transform: translateY(0); }
+.button-modern::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s; }
+.button-modern:hover::before { left: 100%; }
+
+.fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(20px);} to { opacity:1; transform: translateY(0);} }
+.slide-in { animation: slideIn 0.5s ease-out; }
+@keyframes slideIn { from { opacity:0; transform: translateX(-20px);} to { opacity:1; transform: translateX(0);} }
+
+/* text-gradient class removed from HTML - no longer needed */
+
+.search-input { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(71,85,105,0.5); transition: all 0.3s ease; }
+.search-input:focus { background: rgba(30,41,59,0.8); border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+/* HISTORIA-CANTADA STYLE COMPONENTS */
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+.hero {
+  padding: 28px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.hero-content {
+  max-width: 980px;
+}
+
+.hero-title {
+  font-weight: 800;
+  font-size: clamp(28px, 4vw, 56px);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.hero-lede {
+  margin: 0 0 12px;
+  color: #6b0300 !important;
+  font-size: 17px;
+}
+
+/* text-gradient class removed from HTML - no longer needed */
+
+.hero-gradient {
+  background: #f4f4f4;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.glass-card {
+  background: #f4f4f4;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border-radius: 16px;
+
+}
+
+.home-cards {
+  margin-top: 28px;
+}
+
+.cards-2col {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .cards-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.choice-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.choice-card:hover {
+  outline: 1px solid rgba(255,0,0,.35);
+  background: rgba(255,255,255,0.95);
+}
+
+.choice-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(99,138,255,.18)
+  border: 1px solid rgba(0,0,0,0.08);
+  font-size: 22px;
+}
+
+.choice-title {
+  margin: 2px 0 0;
+  font-weight: 700;
+  font-size: 22px;
+  color: #ff0000 !important;
+}
+
+.choice-desc {
+  margin: 2px 0 10px;
+  color: #6b0300 !important;
+  flex-grow: 1;
+}
+
+.btn {
+  width: 100%;
+  border-radius: 0.5rem;
+  min-height: 2.5rem;
+  border: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  color: #fff;
+  margin-top: auto;
+  text-align: center;
+}
+
+.btn-primary {
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+}
+.btn-green {
+  background: linear-gradient(to right, #10b981, #14b8a6);
+}
+.btn-purple {
+  background: linear-gradient(to right, #6366f1, #8b5cf6);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+}
+
+/* Page header */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem 1rem 0;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.back-link {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: opacity 0.2s;
+}
+
+.back-link:hover {
+  opacity: 0.7;
+}
+
+.page-title {
+  flex: 1;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff0000 !important;
+  margin: 0;
+  text-align: center;
+}
+
+/* Presentation page - biblioteca style */
+.presentation-card {
+  background-color: var(--panel);
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 0 auto 2rem;
+  max-width: 900px;
+}
+
+.presentation-heroimg-wrapper {
+  background-color: #f3f4f6;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  aspect-ratio: 16/6;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.presentation-heroimg-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.presentation-textblock {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.presentation-textblock p {
+  margin: 0 0 1rem;
+}
+
+.audio-row {
+  margin-top: 1.5rem;
+}
+
+.audio-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.75rem 1.25rem;
+  line-height: 1rem;
+  border-radius: 0.5rem;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.audio-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+/* LIGHT THEME OVERRIDES */
+:root[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] .choice-card {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="light"] .choice-card:hover {
+  background: rgba(255, 255, 255, 1);
+}
+
+:root[data-theme="light"] .card-panel {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="light"] .hero-gradient {
+  background:
+    radial-gradient(1000px 400px at 20% -10%, rgba(255,0,0,0.08), transparent 60%),
+    rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="light"] .presentation-card {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] .presentation-heroimg-wrapper {
+  background-color: #1e293b;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+
+
