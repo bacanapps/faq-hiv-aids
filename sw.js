@@ -1,5 +1,5 @@
 /* PWA Service Worker – safe for GitHub Pages subpaths */
-const VERSION = 'v202512102020'; // bump on each deploy to avoid stale caches
+const VERSION = 'v202512111000'; // bump on each deploy to avoid stale caches
 const CACHE_NAME = `faq-cache-${VERSION}`;
 
 // Only cache the shell. Data is network-first.
